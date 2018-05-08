@@ -51,26 +51,7 @@ public class Servidor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		try {
-//			ServerSocket servidor = new ServerSocket(8000);
-//			Socket clienteNuevo = servidor.accept();
-//			ObjectInputStream entrada = new ObjectInputStream(clienteNuevo.getInputStream());
-//			System.out.println("Llego el Objeto");
-//			System.out.println("Mandando otro mensaje al cliente");
-//			String mensaje = (String)entrada.readObject();
-//			System.out.println("Mensaje: "+mensaje);
-//			ObjectOutputStream resp = new ObjectOutputStream(clienteNuevo.getOutputStream());
-//			resp.writeObject("Hola cliente");
-//			System.out.println("Mensaje enviado");
-//			clienteNuevo.close();
-//			servidor.close();
-//			
-//		}catch (IOException e) {
-//			Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE,null,e);
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+//		
 		try {
 			System.out.println("entramos al try");
 			ServerSocket servidor = new ServerSocket(8000);
@@ -79,41 +60,6 @@ public class Servidor {
 				Socket clienteNuevo = servidor.accept();
 				System.out.println("Se conecto el cliente");
 				InputStream entrada = clienteNuevo.getInputStream();
-//				int a = entrada.read();
-//				byte[] msjCliente = new byte[100000];
-//				String prueba;
-//				for(int i = 0; i < msjCliente.length; i++) {
-//					
-//				}
-//				BufferedInputStream bis = new BufferedInputStream(entrada);
-//				ByteArrayOutputStream buf = new ByteArrayOutputStream();
-//				int result = entrada.read(msjCliente,0,100000);
-//				String k;
-//				while(result != -1) {
-////					System.out.println(buf.toString("UTF-8"));
-//					System.out.println(result);
-////				    buf.write((byte) result);
-//				    result = entrada.read(msjCliente,0,100000);
-//				    System.out.println(result);
-//				    k = new String(msjCliente);
-//				    System.out.println(k);
-//				}
-				// StandardCharsets.UTF_8.name() > JDK 7
-//				return buf.toString("UTF-8");
-				
-				
-//                entrada.read(msjCliente,0,100000);
-//                FileOutputStream fos = new FileOutputStream("C:\\xml\\archivo.xml");
-//				fos.write(msjCliente);
-//				fos.close();
-//				System.out.println(msjCliente.length);
-//				System.out.println(entrada.read());
-//                byte[] buf = getBytesFromInputStream(entrada);
-//				byte[] buf = readFully(entrada,200000,true);
-                //convierte a string
-//                String received = new String(msjCliente);
-//				String mensaje = (String)entrada.readObject();
-//				String received = new String(buf.toString());
 				String received = getStringFromInputStream(entrada);
 //				String received = new String(buf);
                 String lol = received.trim();
@@ -121,33 +67,6 @@ public class Servidor {
                 String lel = lal + "</MensajeXML>";
 				System.out.println(lel+"lol");
                 System.out.println(lel.length());
-//				BufferedWriter writer = null;
-//				try
-//				{
-//				    writer = new BufferedWriter( new FileWriter("C:\\xml\\archivo.xml"));
-//				    writer.write(lel);
-//
-//				}
-//				catch ( IOException e)
-//				{
-//				}
-//				finally
-//				{
-//				    try
-//				    {
-//				        if ( writer != null)
-//				        writer.close( );
-//				    }
-//				    catch ( IOException e)
-//				    {
-//				    }
-//				}
-//				PrintWriter out = new PrintWriter("C:\\xml\\archivo.xml");
-//				out.println(msjCliente);
-				
-//				String xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Emp id=\"1\"><name>Pankaj</name><age>25</age><role>Developer</role><gen>Male</gen></Emp>";
-//				System.out.println("Mensaje: "+xmlStr+"quac");
-				
 				
 				//A ver que
 				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
@@ -174,18 +93,8 @@ public class Servidor {
 		              }     
 		           }  
 		        } 
-//		        System.out.println("si aparece esto no es aqui el error");
-//				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//			    factory.setNamespaceAware(true);
-//			    DocumentBuilder builder = factory.newDocumentBuilder();
-//			    Document doc = builder.parse(new ByteArrayInputStream(msjCliente));
 			    System.out.println("si aparece esto no hay error");
 				
-//				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//				Transformer transformer = transformerFactory.newTransformer();
-//				DOMSource source = new DOMSource(doc);
-//				StreamResult result = new StreamResult(new File("C:\\xml\\archivo.xml"));
-//				transformer.transform(source, result);
 		        TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	            Transformer transformer = transformerFactory.newTransformer();
 	            //for pretty print
@@ -205,9 +114,6 @@ public class Servidor {
 				System.out.println("Respondiendo al cliente");
 				PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 				resp.println(lel); 
-//				ObjectOutputStream resp = new ObjectOutputStream(clienteNuevo.getOutputStream());
-//				System.out.println("Mandando otro mensaje al cliente");
-//				resp.writeObject("vida:");
 //				System.out.println("Mensaje enviado");
 				clienteNuevo.close();
 //			 	servidor.close();
@@ -220,49 +126,7 @@ public class Servidor {
 		}
 	}
 	
-	public static byte[] getBytesFromInputStream(InputStream is) throws IOException {
-	    ByteArrayOutputStream os = new ByteArrayOutputStream(); 
-	    byte[] buffer = new byte[10000];
-	    for (int len = 0; len < 10; len++) { 
-	    	System.out.println(len);
-	        os.write(buffer, 0, len);
-	        System.out.println(len+"lrl");
-	    }
-	    System.out.println("salimos seee");
-	    return os.toByteArray();
-	}
 	
-	public static byte[] readFully(InputStream is, int length, boolean readAll) throws IOException {
-	    byte[] output = {};
-	    if (length == -1) length = Integer.MAX_VALUE;
-	    System.out.println(length);
-	    int pos = 0;
-	    while (pos < length) {
-	        int bytesToRead;
-	        if (pos >= output.length) { // Only expand when there's no room
-	            bytesToRead = Math.min(length - pos, output.length + 1024);
-	            if (output.length < pos + bytesToRead) {
-	                output = Arrays.copyOf(output, pos + bytesToRead);
-	            }
-	        } else {
-	            bytesToRead = output.length - pos;
-	        }
-	        int cc = is.read(output, pos, bytesToRead);
-	        if (cc < 0) {
-	            if (readAll && length != Integer.MAX_VALUE) {
-	                throw new EOFException("Detect premature EOF");
-	            } else {
-	                if (output.length != pos) {
-	                    output = Arrays.copyOf(output, pos);
-	                }
-	                break;
-	            }
-	        }
-	        pos += cc;
-	    }
-	    System.out.println("logramos salir de un puto siclo Aaaahhhhhh!!!");
-	    return output;
-	}
 	
 	private static String getStringFromInputStream(InputStream is) {
 		System.out.println("Nos metimos al getStringFromImputStream");
@@ -292,14 +156,6 @@ public class Servidor {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-//		} finally {
-//			if (br != null) {
-//				try {
-//					br.close();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
 		}
 
 		return sb.toString();
