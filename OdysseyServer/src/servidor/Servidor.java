@@ -65,7 +65,7 @@ public class Servidor {
                 String lol = received.trim();
                 String lal = lol.substring(3);
                 String lel = lal + "</MensajeXML>";
-				System.out.println(lel+"lol");
+				System.out.println(lel);
                 System.out.println(lel.length());
 				
 				//A ver que
@@ -73,26 +73,53 @@ public class Servidor {
 				DocumentBuilder builder;
 		        builder = factory.newDocumentBuilder();  
 //		        System.out.println("hasta aqui bien");
-		        Document doc = builder.parse( new InputSource( new StringReader( lel ) ) );
+		        Document doc = builder.parse(new InputSource(new StringReader(lel)));
 		        System.out.println(doc.getNodeName());
 		        NodeList listaNodos = doc.getElementsByTagName("Code");
-		        for(int i=0;i<listaNodos.getLength();i++){  
-		           Node nodo = listaNodos.item(i);  
-		           if (nodo.getTextContent().equals("add")){  
-		              System.out.println("Agregamos una nueva cancion");
-		              NodeList nodos = doc.getElementsByTagName("Song");
-		              for(int ind=0;ind<nodos.getLength();ind++){  
-				           Node nod = nodos.item(ind);
-				           String encodedString = nod.getTextContent();
-				           System.out.println(encodedString);
-				           byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-				           File file2 = new File("C:\\xml\\hello-5.mp3");
-				           FileOutputStream os = new FileOutputStream(file2, true);
-				           os.write(decodedBytes);
-				           os.close();
-		              }     
-		           }  
-		        } 
+		        Node nodo = listaNodos.item(0);
+		        if (nodo.getTextContent().equals("add")){  
+		           System.out.println("Agregamos una nueva cancion");
+		           NodeList nodos = doc.getElementsByTagName("Song");
+		           for(int ind=0;ind<nodos.getLength();ind++){
+				        Node nod = nodos.item(ind);
+				        String encodedString = nod.getTextContent();
+				        System.out.println(encodedString);
+				        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+				        nodos = doc.getElementsByTagName("Nombre");
+					    nod = nodos.item(0);
+				        File file2 = new File("C:\\xml\\"+nod.getTextContent()+".mp3");
+				        FileOutputStream os = new FileOutputStream(file2, true);
+				        os.write(decodedBytes);
+				        os.close();
+				        System.out.println("Respondiendo al cliente");
+						PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+						resp.println(lel); 
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+		           }     
+		        }else if(nodo.getTextContent().equals("cargar")) {
+		     	   NodeList nodos = doc.getElementsByTagName("Orden");
+		       	   Node nod = nodos.item(0);
+		       	   if(nod.getTextContent().equals("nombre")) {
+		       		   System.out.println("Respondiendo al cliente");
+		       		   PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		       		   resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra> </Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra> </Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra> </Letra></Cancion></ArrayOfCancion></MensajeXML>"); 
+		       		   System.out.println("Mensaje enviado");
+		       		   clienteNuevo.close();
+		       	   }else if(nod.getTextContent().equals("artista")) {
+		       		   System.out.println("Respondiendo al cliente");
+		       		   PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		       		   resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra> </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra> </Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra> </Letra></Cancion></ArrayOfCancion></MensajeXML>"); 
+		       		   System.out.println("Mensaje enviado");
+		       		   clienteNuevo.close();
+		       	   }else if(nod.getTextContent().equals("album")) {
+		       		   System.out.println("Respondiendo al cliente");
+		       		   PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		       		   resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra> </Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra> </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra> </Letra></Cancion></ArrayOfCancion></MensajeXML>"); 
+		       		   System.out.println("Mensaje enviado");
+		       		   clienteNuevo.close();
+		       	   }
+		        }
 			    System.out.println("si aparece esto no hay error");
 				
 		        TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -111,11 +138,11 @@ public class Servidor {
 	            System.out.println("DONE");
 		        
 				
-				System.out.println("Respondiendo al cliente");
-				PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				resp.println(lel); 
+//				System.out.println("Respondiendo al cliente");
+//				PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+//				resp.println(lel); 
 //				System.out.println("Mensaje enviado");
-				clienteNuevo.close();
+//				clienteNuevo.close();
 //			 	servidor.close();
 			}
 		}catch (Exception e) {
@@ -128,6 +155,35 @@ public class Servidor {
 	
 	
 	
+//	private static String getStringFromInputStream(InputStream is) {
+//		System.out.println("Nos metimos al getStringFromImputStream");
+//		BufferedReader br = null;
+//		StringBuilder sb = new StringBuilder();
+//
+//		String line;
+//		try {
+//			System.out.println("Entramos al try");
+//			br = new BufferedReader(new InputStreamReader(is));
+//			int ind = 0;
+//			int cond = 3;
+//			line = br.readLine();
+//			sb.append(line);
+//			while ((line = br.readLine()) != null) {
+//				System.out.println(line);
+//				sb.append(line);
+//				ind++;
+//				System.out.println(ind);
+//			}
+//			System.out.println("Salimos bien del while");
+//
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//
+//		return sb.toString();
+//
+//	}
+	
 	private static String getStringFromInputStream(InputStream is) {
 		System.out.println("Nos metimos al getStringFromImputStream");
 		BufferedReader br = null;
@@ -139,15 +195,11 @@ public class Servidor {
 			br = new BufferedReader(new InputStreamReader(is));
 			int ind = 0;
 			int cond = 3;
-			while (ind < cond) {
+			line = br.readLine();
+			sb.append(line);
+			while (line.equals("  </Datos>") != true) {
 				line = br.readLine();
-				if(line.equals("  <Code>add</Code>")) {
-					System.out.println("como que si se puede lo que estoy pensando");
-					cond = 11;
-				}else if(line.equals("  <Code>elim</Code>")){
-					System.out.println("va a dar error");
-					cond = 4;
-				}
+				System.out.println(line);
 				sb.append(line);
 				ind++;
 				System.out.println(ind);
@@ -161,5 +213,7 @@ public class Servidor {
 		return sb.toString();
 
 	}
+	
+	
 
 }
