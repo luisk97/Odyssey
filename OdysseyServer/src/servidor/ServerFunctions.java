@@ -3,6 +3,7 @@
  */
 package servidor;
 
+<<<<<<< HEAD
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,12 +19,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+=======
+>>>>>>> Daniel
 /**
  * @author Daniel Acuña Mora
  *
  */
 public class ServerFunctions {
 
+<<<<<<< HEAD
 	public static void setMeta() throws IOException, TagException {
 		MP3File mp3file = new MP3File("C:\\xml\\Juanpa.mp3");
 		ID3v2_2 tag = (ID3v2_2) mp3file.getID3v2Tag();
@@ -64,4 +68,6 @@ public class ServerFunctions {
 			clienteNuevo.close();
 		}
 	}
+=======
+>>>>>>> Daniel
 }
