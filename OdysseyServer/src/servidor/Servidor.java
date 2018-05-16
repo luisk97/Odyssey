@@ -109,25 +109,8 @@ public class Servidor {
 				NodeList listaNodos = doc.getElementsByTagName("Code");
 				Node nodo = listaNodos.item(0);
 				if (nodo.getTextContent().equals("add")) {
-					addSong(doc, clienteNuevo, lel);
-					// System.out.println("Agregamos una nueva cancion");
-					// NodeList nodos = doc.getElementsByTagName("Song");
-					// for(int ind=0;ind<nodos.getLength();ind++){
-					// Node nod = nodos.item(ind);
-					// String encodedString = nod.getTextContent();
-					// //System.out.println(encodedString);
-					// byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-					// nodos = doc.getElementsByTagName("Nombre");
-					// nod = nodos.item(0);
-					// File file2 = new File("C:\\xml\\"+nod.getTextContent()+".mp3");
-					// FileOutputStream os = new FileOutputStream(file2, true);
-					// os.write(decodedBytes);
-					// os.close();
-					// System.out.println("Respondiendo al cliente");
-					// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					// resp.println(lel);
-					// System.out.println("Mensaje enviado");
-					// clienteNuevo.close();
+					ServerFunctions.addSong(doc, clienteNuevo, lel);
+
 				}
 				// }else if(nodo.getTextContent().equals("cargar")) {
 				// NodeList nodos = doc.getElementsByTagName("Orden");
@@ -271,30 +254,5 @@ public class Servidor {
 
 	}
 
-	public static void addSong(Document d, Socket s, String sd) throws IOException {
-		Document doc = d;
-		Socket clienteNuevo = s;
-		String lel = sd;
-		System.out.println("HOla mundo");
-		System.out.println("Agregamos una nueva cancion");
-		NodeList nodos = doc.getElementsByTagName("Song");
-		for (int ind = 0; ind < nodos.getLength(); ind++) {
-			Node nod = nodos.item(ind);
-			String encodedString = nod.getTextContent();
-			// System.out.println(encodedString);
-			byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-			nodos = doc.getElementsByTagName("Nombre");
-			nod = nodos.item(0);
-			File file2 = new File("C:\\xml\\" + nod.getTextContent() + ".mp3");
-			FileOutputStream os = new FileOutputStream(file2, true);
-			os.write(decodedBytes);
-			os.close();
-			System.out.println("Respondiendo al cliente");
-			PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-			resp.println(lel);
-			System.out.println("Mensaje enviado");
-			clienteNuevo.close();
-		}
-	}
 
 }
