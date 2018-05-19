@@ -132,58 +132,9 @@ public class Servidor {
 				if (nodo.getTextContent().equals("add")) {
 					ServerFunctions.addSong(doc, clienteNuevo, lel);
 
+				}else if(nodo.getTextContent().equals("cargar")) {
+					ServerFunctions.sortSongs(clienteNuevo, doc);
 				}
-				// }else if(nodo.getTextContent().equals("cargar")) {
-				// NodeList nodos = doc.getElementsByTagName("Orden");
-				// Node nod = nodos.item(0);
-				// if(nod.getTextContent().equals("nombre")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Sad But
-				// True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }else if(nod.getTextContent().equals("artista")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad
-				// But True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }else if(nod.getTextContent().equals("album")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad
-				// But True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }
-				// }
-				// System.out.println("si aparece esto no hay error");
 
 				TransformerFactory transformerFactory = TransformerFactory.newInstance();
 				Transformer transformer = transformerFactory.newTransformer();
@@ -206,7 +157,7 @@ public class Servidor {
 				// System.out.println("Mensaje enviado");
 				// clienteNuevo.close();
 				// servidor.close();
-				// }
+				 }
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

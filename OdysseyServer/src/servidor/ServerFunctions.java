@@ -139,4 +139,29 @@ public class ServerFunctions {
 		System.out.println(xml1);
 
 	}
+	public static void sortSongs(Socket s,Document d) throws IOException {
+		Socket clienteNuevo = s;
+		Document doc = d;
+		NodeList nodos = doc.getElementsByTagName("Orden");
+		 Node nod = nodos.item(0);
+		if(nod.getTextContent().equals("nombre")) {
+		 System.out.println("Respondiendo al cliente");
+		 PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		 resp.println("\"<?xml version=\\\"1.0\\\" encoding=\\\"UTF-8\\\"standalone=\\\"no\\\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>SadBut True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>EnterSadman</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion></ArrayOfCancion></MensajeXML>\"");
+		 System.out.println("Mensaje enviado");
+		 clienteNuevo.close();
+		 }else if(nod.getTextContent().equals("artista")) {
+		 System.out.println("Respondiendo al cliente");
+		 PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		 resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>SadBut True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>EnterSadman</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion></ArrayOfCancion></MensajeXML>");
+		 System.out.println("Mensaje enviado");
+		 clienteNuevo.close();
+		 }else if(nod.getTextContent().equals("album")) {
+		 System.out.println("Respondiendo al cliente");
+		 PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		 resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>SadBut True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>EnterSadman</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion></ArrayOfCancion></MensajeXML>");
+		 System.out.println("Mensaje enviado");
+		 clienteNuevo.close();
+		 }
+	}
 }
