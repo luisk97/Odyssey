@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -66,24 +67,39 @@ import javafx.scene.text.TextAlignment;
  * @author Daniel2443
  */
 public class Servidor {
-	protected static ArrayList<Song> songs;
+	protected static ArrayList<Song> songs = new ArrayList<>();;
 
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
-		File file = new File("canciones.json");
-		ObjectMapper mapper = new ObjectMapper();
-		songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
-		});
+		try {
+			File file = new File("canciones.json");
+			ObjectMapper mapper = new ObjectMapper();
+			songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
+			});
+		}catch(IOException e) {
+			System.out.println("No hay Jsons");
+		}
 	}
 
 	/**
 	 * @param args
+	 * @throws Exception 
 	 * @throws TagException
 	 * @throws IOException
 	 */
-
+	public static void sendXml() throws Exception {
+		ServerFunctions.writeXmlFile();
+	}
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
 		loadJson();
+		try {
+			sendXml();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		for (int i = 0; i < songs.size(); i++)
 			System.out.println(songs.get(i).getTitle());
 		// setMeta();

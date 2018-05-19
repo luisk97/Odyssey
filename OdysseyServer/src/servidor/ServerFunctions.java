@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
 import org.farng.mp3.id3.ID3v1_1;
@@ -23,6 +26,7 @@ import org.w3c.dom.NodeList;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import SongMgmt.Song;
 
@@ -48,12 +52,13 @@ public class ServerFunctions {
 		// filemp3.renameTo(file2);
 	}
 
-	ArrayList<Integer> add = new ArrayList<>();
+	 ArrayList<Integer> add = new ArrayList<>();
+	 private static ArrayList<Song> songs = Servidor.songs;
 
-	public static void addSong(Document d, Socket s, String sd) throws IOException {
-		ArrayList<Song> add = new ArrayList<>();
+	protected static void addSong(Document d, Socket s, String sd) throws IOException {
+		//ArrayList<Song> songs = Servidor.songs;
+		//songs.add(new Song());
 
-		add.add(new Song());
 
 		Document doc = d;
 		Socket clienteNuevo = s;
@@ -76,10 +81,16 @@ public class ServerFunctions {
 			PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 			resp.println(lel);
 			System.out.println("Mensaje enviado");
-			createJson(nodos, doc,path);
+
 			clienteNuevo.close();
 
+			createJson(nodos, doc,"casa");
+			for (int i = 0; i < songs.size(); i++) {
+				System.out.println(songs.get(i).getTitle());}
+
 		}
+		
+
 	}
 
 	/**
@@ -88,14 +99,14 @@ public class ServerFunctions {
 	 * @throws JsonGenerationException
 	 * 
 	 */
-	private static void createJson(NodeList n, Document d,String p)
+	public static void createJson(NodeList n, Document d,String p)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		String path = p;
-		ArrayList<Song> songs = Servidor.songs;
-		songs.add(new Song());
 		NodeList nodos = n;
 		Document doc = d;
 		Node nod = nodos.item(0);
+		songs.add(0, new Song());
+		//songs.add(new Song());
 		String[] tags = new String[] { "Nombre", "Artista", "Album", "Genero" };
 
 		for (int i = 0; i < tags.length; i++) {
@@ -109,7 +120,23 @@ public class ServerFunctions {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(file, songs);
 		// TODO Auto-generated method stub
+		//System.out.println("Vieja cancion:"+songs.get(1).getTitle());
 		System.out.println("Nueva cancion:"+songs.get(0).getTitle());
+
+	}
+	public static void writeXmlFile() {
+		ArrayList<Song> songs = Servidor.songs;
+		XmlMapper xmlmapper = new XmlMapper();
+		String xml1 = null;
+		String doc; 
+		File xml = new File("canciones.xml");
+		try {
+		    xml1 = xmlmapper.writeValueAsString(songs);		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		;
+		System.out.println(xml1);
 
 	}
 }
