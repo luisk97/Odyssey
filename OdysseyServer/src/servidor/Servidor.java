@@ -26,9 +26,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -50,6 +52,14 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+import SongMgmt.Song;
 import javafx.scene.text.TextAlignment;
 
 /**
@@ -57,32 +67,42 @@ import javafx.scene.text.TextAlignment;
  * @author Daniel2443
  */
 public class Servidor {
+	protected static ArrayList<Song> songs = new ArrayList<>();;
+
+	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
+		try {
+			File file = new File("canciones.json");
+			ObjectMapper mapper = new ObjectMapper();
+			songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
+			});
+		}catch(IOException e) {
+			System.out.println("No hay Jsons");
+		}
+	}
 
 	/**
 	 * @param args
+	 * @throws Exception 
 	 * @throws TagException
 	 * @throws IOException
 	 */
-	public static void setMeta() throws IOException, TagException {
-		MP3File mp3file = new MP3File("C:\\xml\\Juanpa.mp3");
-		ID3v2_2 tag = (ID3v2_2) mp3file.getID3v2Tag();
-		ID3v1_1 tag1 = (ID3v1_1) mp3file.getID3v1Tag();
-		tag.setSongTitle("8BIT");
-		tag.setAlbumTitle("Synth");
-		tag.setSongGenre("Retro");
-		tag1.setArtist("DAni");
-
-		System.out.println(tag.getAlbumTitle());
-		mp3file.save();
-		// File filemp3 = new File("C:\\xml\\Juanpa.mp3");
-		// File file2 = new File("C:\\xml\\"+tag.getSongTitle()+".mp3");
-		// filemp3.renameTo(file2);
+	public static void sendXml() throws Exception {
+		ServerFunctions.writeXmlFile();
 	}
-
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
-
-		setMeta();
+		loadJson();
+		try {
+			sendXml();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		for (int i = 0; i < songs.size(); i++)
+			System.out.println(songs.get(i).getTitle());
+		// setMeta();
 		try {
 			System.out.println("entramos al try");
 			ServerSocket servidor = new ServerSocket(8000);
@@ -106,28 +126,12 @@ public class Servidor {
 				// System.out.println("hasta aqui bien");
 				Document doc = builder.parse(new InputSource(new StringReader(lel)));
 				// System.out.println(doc.getNodeName());
+				// System.out.println(lel);
 				NodeList listaNodos = doc.getElementsByTagName("Code");
 				Node nodo = listaNodos.item(0);
 				if (nodo.getTextContent().equals("add")) {
-					addSong(doc, clienteNuevo, lel);
-					// System.out.println("Agregamos una nueva cancion");
-					// NodeList nodos = doc.getElementsByTagName("Song");
-					// for(int ind=0;ind<nodos.getLength();ind++){
-					// Node nod = nodos.item(ind);
-					// String encodedString = nod.getTextContent();
-					// //System.out.println(encodedString);
-					// byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-					// nodos = doc.getElementsByTagName("Nombre");
-					// nod = nodos.item(0);
-					// File file2 = new File("C:\\xml\\"+nod.getTextContent()+".mp3");
-					// FileOutputStream os = new FileOutputStream(file2, true);
-					// os.write(decodedBytes);
-					// os.close();
-					// System.out.println("Respondiendo al cliente");
-					// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					// resp.println(lel);
-					// System.out.println("Mensaje enviado");
-					// clienteNuevo.close();
+					ServerFunctions.addSong(doc, clienteNuevo, lel);
+
 				}
 				// }else if(nodo.getTextContent().equals("cargar")) {
 				// NodeList nodos = doc.getElementsByTagName("Orden");
@@ -186,7 +190,7 @@ public class Servidor {
 				// for pretty print
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				DOMSource source = new DOMSource(doc);
-
+				System.out.println();
 				// write to console or file
 				// StreamResult console = new StreamResult(System.out);
 				StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
@@ -211,35 +215,6 @@ public class Servidor {
 			// e.printStackTrace();
 		}
 	}
-
-	// private static String getStringFromInputStream(InputStream is) {
-	// System.out.println("Nos metimos al getStringFromImputStream");
-	// BufferedReader br = null;
-	// StringBuilder sb = new StringBuilder();
-	//
-	// String line;
-	// try {
-	// System.out.println("Entramos al try");
-	// br = new BufferedReader(new InputStreamReader(is));
-	// int ind = 0;
-	// int cond = 3;
-	// line = br.readLine();
-	// sb.append(line);
-	// while ((line = br.readLine()) != null) {
-	// System.out.println(line);
-	// sb.append(line);
-	// ind++;
-	// System.out.println(ind);
-	// }
-	// System.out.println("Salimos bien del while");
-	//
-	// } catch (IOException e) {
-	// e.printStackTrace();
-	// }
-	//
-	// return sb.toString();
-	//
-	// }
 
 	private static String getStringFromInputStream(InputStream is) {
 		System.out.println("Nos metimos al getStringFromImputStream");
@@ -266,35 +241,8 @@ public class Servidor {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		return sb.toString();
 
-	}
-
-	public static void addSong(Document d, Socket s, String sd) throws IOException {
-		Document doc = d;
-		Socket clienteNuevo = s;
-		String lel = sd;
-		System.out.println("HOla mundo");
-		System.out.println("Agregamos una nueva cancion");
-		NodeList nodos = doc.getElementsByTagName("Song");
-		for (int ind = 0; ind < nodos.getLength(); ind++) {
-			Node nod = nodos.item(ind);
-			String encodedString = nod.getTextContent();
-			// System.out.println(encodedString);
-			byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-			nodos = doc.getElementsByTagName("Nombre");
-			nod = nodos.item(0);
-			File file2 = new File("C:\\xml\\" + nod.getTextContent() + ".mp3");
-			FileOutputStream os = new FileOutputStream(file2, true);
-			os.write(decodedBytes);
-			os.close();
-			System.out.println("Respondiendo al cliente");
-			PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-			resp.println(lel);
-			System.out.println("Mensaje enviado");
-			clienteNuevo.close();
-		}
 	}
 
 }

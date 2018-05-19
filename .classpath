@@ -3,5 +3,13 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="OdysseyServer/src"/>
 	<classpathentry kind="lib" path="jid3lib-0.5.4.jar"/>
+	<classpathentry kind="lib" path="Libraries/jackson-annotations-2.9.5.jar"/>
+	<classpathentry kind="lib" path="Libraries/jackson-core-2.9.5.jar"/>
+	<classpathentry kind="lib" path="Libraries/jackson-databind-2.9.5.jar"/>
+	<classpathentry kind="lib" path="Libraries/jackson-dataformat-xml-2.9.5.jar"/>
+	<classpathentry kind="lib" path="Libraries/jackson-module-jaxb-annotations-2.9.5.jar"/>
+	<classpathentry kind="lib" path="Libraries/stax2-api-4.1.jar"/>
+	<classpathentry kind="lib" path="Libraries/woodstox-core-5.1.0.jar"/>
+	<classpathentry kind="lib" path="Libraries/simple-xml-2.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
