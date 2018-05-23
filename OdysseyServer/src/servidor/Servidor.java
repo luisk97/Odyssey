@@ -67,7 +67,7 @@ import javafx.scene.text.TextAlignment;
  * @author Daniel2443
  */
 public class Servidor {
-	protected static ArrayList<Song> songs = new ArrayList<>();;
+	protected static ArrayList<Song> songs = new ArrayList<>();
 
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
 		try {
@@ -158,7 +158,6 @@ public class Servidor {
 				// clienteNuevo.close();
 				// servidor.close();
 				 }
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			// } catch (ClassNotFoundException e) {

@@ -77,9 +77,9 @@ public class ServerFunctions {
 			FileOutputStream os = new FileOutputStream(file2, true);
 			os.write(decodedBytes);
 			os.close();
-			System.out.println("Respondiendo al cliente");
-			PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-			resp.println(lel);
+			//System.out.println("Respondiendo al cliente");
+			//PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+			//resp.println(lel);
 			System.out.println("Mensaje enviado");
 
 			clienteNuevo.close();
@@ -135,7 +135,6 @@ public class ServerFunctions {
 			e.printStackTrace();
 		}
 		
-		;
 		System.out.println(xml1);
 
 	}
@@ -163,5 +162,12 @@ public class ServerFunctions {
 		 System.out.println("Mensaje enviado");
 		 clienteNuevo.close();
 		 }
+	}
+	public void playSong(Socket s,int id) {
+		Socket clienteNuevo = s;
+		int code = id;
+		
+		
+
 	}
 }
