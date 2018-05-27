@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -21,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -66,24 +69,39 @@ import javafx.scene.text.TextAlignment;
  * @author Daniel2443
  */
 public class Servidor {
-	protected static ArrayList<Song> songs;
+	protected static ArrayList<Song> songs = new ArrayList<>();;
 
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
-		File file = new File("canciones.json");
-		ObjectMapper mapper = new ObjectMapper();
-		songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
-		});
+		try {
+			File file = new File("canciones.json");
+			ObjectMapper mapper = new ObjectMapper();
+			songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
+			});
+		}catch(IOException e) {
+			System.out.println("No hay Jsons");
+		}
 	}
 
 	/**
 	 * @param args
+	 * @throws Exception 
 	 * @throws TagException
 	 * @throws IOException
 	 */
-
+	public static void sendXml() throws Exception {
+		ServerFunctions.writeXmlFile();
+	}
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
 		loadJson();
+		try {
+			sendXml();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		for (int i = 0; i < songs.size(); i++)
 			System.out.println(songs.get(i).getTitle());
 		// setMeta();
@@ -115,59 +133,197 @@ public class Servidor {
 				Node nodo = listaNodos.item(0);
 				if (nodo.getTextContent().equals("add")) {
 					ServerFunctions.addSong(doc, clienteNuevo, lel);
+				}else if(nodo.getTextContent().equals("cargar")) {
+					ServerFunctions.sortSongs(clienteNuevo, doc);
+				}else if(nodo.getTextContent().equals("eliminar")) {
+					 NodeList nodos = doc.getElementsByTagName("Cancion");
+					 PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					 if(nodos.getLength()>0) {
+						 System.out.println("Se eliminaran las siguientes canciones:");
+						 for(int i = 0; i < nodos.getLength();i++) {
+							 System.out.println(nodos.item(i).getTextContent());
+							 //Aqui debe ir el metodo para eliminar las canciones que vienen en la NodeList y tiene que
+							 //eliminarlas de la SongList y borrar el archivo .mp3
+						 }
+						 System.out.println("Respondiendo al cliente");
+						 resp.println("Las canciones se eliminaron correctamente");
+						 System.out.println("Mensaje enviado");
+						 clienteNuevo.close();
+					 }else {
+						 System.out.println("Respondiendo al cliente");
+						 resp.println("No se eligio ninguna cancion para eliminar");
+						 System.out.println("Mensaje enviado");
+						 clienteNuevo.close();
+					 }
+				}else if(nodo.getTextContent().equals("logIn"))	{
+					System.out.println("Un usuario esta iniciando sesion");
+					NodeList nodos = doc.getElementsByTagName("User");
+					Node nod1 = nodos.item(0);
+					nodos = doc.getElementsByTagName("Password");
+					Node nod2 = nodos.item(0);
+					//string confirmacion = algunMetodoQueValidaUsuario(nod1.getTextContent(),nod2.getTextContent());
+					//Por ahora lo validaremos asi para ver si sirve:
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					if(nod1.getTextContent().equals("luisk")) {
+						if(nod2.getTextContent().equals("pass")) {
+							System.out.println("Se concedio el acceso al usuario");
+							System.out.println("Respondiendo al cliente");
+							resp.println("acceso permitido");
+							System.out.println("Mensaje enviado");
+							clienteNuevo.close();
+							System.out.println("Sesion Iniciada");
+						}else {
+							System.out.println("Contraseña incorrecta");
+							System.out.println("Respondiendo al cliente");
+							resp.println("error pass");
+							System.out.println("Mensaje enviado");
+							clienteNuevo.close();
+						}
+					}else {
+						System.out.println("Usuario invalido");
+						System.out.println("Respondiendo al cliente");
+						resp.println("error user");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}
+				}else if(nodo.getTextContent().equals("signIn")) {
+					System.out.println("Se esta rejistrando un usuario");
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					NodeList nodos = doc.getElementsByTagName("User");
+					Node nod1 = nodos.item(0);
+					//string confirmacion = algunMetodoQueValidaSiYaExisteElUsuario(nod1.getTextContent(),nod2.getTextContent());
+					
+					//Por ahora lo validaremos asi para ver si sirve:
+					if(!nod1.getTextContent().equals("LuisK")) {
+						nodos = doc.getElementsByTagName("FullName");
+						Node nod2 = nodos.item(0);
+						nodos = doc.getElementsByTagName("Age");
+						Node nod3 = nodos.item(0);
+						nodos = doc.getElementsByTagName("Password");
+						Node nod4 = nodos.item(0);
+						System.out.println("El usuario se registro con exito!");
+						System.out.println("Respondiendo al cliente");
+						resp.println("exito");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}else{
+						System.out.println("El usuario que se desea registrar ya existe!");
+						System.out.println("Respondiendo al cliente");
+						resp.println("usuario existente");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}
+				}else if(nodo.getTextContent().equals("buscar")) {
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					NodeList nodos = doc.getElementsByTagName("Por");
+					Node nod1 = nodos.item(0);
+					if(nod1.getTextContent().equals("nombre")) {
+						nodos = doc.getElementsByTagName("Nombre");
+						nod1 = nodos.item(0);
+						System.out.println("Buscando las canciones llamadas "+nod1.getTextContent());
+						//Aqui debe ir un metodo que busque el nombre dentro del arbolB como talvez search(nod1.getTextContent());
+						//y que es metodo nos debuelva la lista de canciones con ese nombre ejemplo SongList lista = arbolB.search(nod1.getTextContent());
+						//y convertirla a xml con el metodo de ServerFunctions writeXmlFile() o hacer un metodo parecido que reciba la SongList y devuelva 
+						//el xml convertido a String como por ejemplo string msjEnviar = ServerFunctions.writeXmlFile(lista); y devolver eso al cliente
+						 
+						//Y si no encuentra canciones con ese nombre, osea if(lista.size > 0 == false) devuelve esto:
+						System.out.println("No se encontraron canciones con ese nombre");
+						System.out.println("Respondiendo al cliente");
+						resp.println("No encontrado");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}else if(nod1.getTextContent().equals("artista")) {
+						nodos = doc.getElementsByTagName("Artista");
+						nod1 = nodos.item(0);
+						System.out.println("Buscando canciones del artista "+nod1.getTextContent());
+						//Lo mismo que en el anterior pero con el arbol AVL
+						 
+						//Y si no encuentra canciones de ese artista devuelve esto: 
+						System.out.println("No se encontraron canciones de ese artista");
+						System.out.println("Respondiendo al cliente");
+						resp.println("No encontrado");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}else if(nod1.getTextContent().equals("album")) {
+						nodos = doc.getElementsByTagName("Album");
+						nod1 = nodos.item(0);
+						System.out.println("Buscando canciones del album "+nod1.getTextContent());
+						//Lo mismo que en el anterior pero con el arbol Splay
+						 
+						//Y si no encuentra canciones de ese album devuelve esto:
+						System.out.println("No se encontraron canciones de ese album");
+						System.out.println("Respondiendo al cliente");
+						resp.println("No encontrado");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}
+				}else if(nodo.getTextContent().equals("play")) {
+					System.out.println("Se solicito reproducir una cancion");
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					NodeList nodos = doc.getElementsByTagName("Nombre");
+					Node nod = nodos.item(0);
+					String nombre = nod.getTextContent();
+					System.out.println("Se solicito reproducir la cancion "+nombre);
+					File file = new File("C:\\xml\\" +nombre+ ".mp3");
+					byte[] fileBytes = new byte[(int) file.length()];
+					FileInputStream fis = new FileInputStream(file);
+					fis.read(fileBytes);
+					fis.close();
+//					String encodedStr = nod.getTextContent();
+					// System.out.println(encodedString);
+//					byte[] decodedBytes = Base64.getDecoder().decode(encodedStr);
+//					String la = Base64.getEncoder().encodeToString(src)
+//					byte[] encodedBytes = Base64.getEncoder().encode(fileBytes);
+					String encodedString = Base64.getEncoder().encodeToString(fileBytes);
+					String stringXml = "";
+					try {
+						DocumentBuilderFactory factory2 = DocumentBuilderFactory.newInstance();
+						DocumentBuilder builder2;
+						builder2 = factory2.newDocumentBuilder();
+						Document doc2 = builder2.newDocument();
 
+					    Element root = doc2.createElement("MensajeXML");
+					    doc2.appendChild(root);
+					
+					    Element datos = doc2.createElement("Datos");
+					    root.appendChild(datos);
+					
+					    Element codigo = doc2.createElement("Code");
+					    codigo.appendChild(doc2.createTextNode("toPlay"));
+					    datos.appendChild(codigo);
+					    
+					    Element song = doc2.createElement("Cancion");
+					    datos.appendChild(song);
+					
+					    Element nom = doc2.createElement("Bytes");
+					    nom.appendChild(doc2.createTextNode(encodedString));
+					    song.appendChild(nom);
+					
+					    datos.appendChild(song);
+					        
+//					        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//							Transformer transformer = transformerFactory.newTransformer();
+//							transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+//							DOMSource source = new DOMSource(doc);
+//							
+//							StreamResult file = new StreamResult(new File("C:\\xml\\canciones.xml"));
+//							transformer.transform(source, file);
+							
+						TransformerFactory tf = TransformerFactory.newInstance();
+						Transformer t = tf.newTransformer();
+						StringWriter sw = new StringWriter();
+						t.transform(new DOMSource(doc2), new StreamResult(sw));
+						stringXml = sw.toString();
+							
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+//					System.out.println(stringXml);
+//					resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><MensajeXML><Datos><Code>toPlay</Code><Cancion><Bytes>SUQzBAAAAAAJMFRJVDIAAAAJAAAAQXBsYXVzb3NUUEUxAAAABgAAAG1hbm9zVEFMQgAAAAwAAABjZWxlYnJhY2lvblRDT04AAAAGAAAAcnVpZG9VU0xUAAAAFAAAAGVuZwBwbGEgcGxhIHBsYSBwbGEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</Bytes></Cancion></Datos></MensajeXML>");
+					resp.println(stringXml);
+					System.out.println("Mensaje enviado");
+					clienteNuevo.close();
 				}
-				// }else if(nodo.getTextContent().equals("cargar")) {
-				// NodeList nodos = doc.getElementsByTagName("Orden");
-				// Node nod = nodos.item(0);
-				// if(nod.getTextContent().equals("nombre")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Sad But
-				// True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }else if(nod.getTextContent().equals("artista")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad
-				// But True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }else if(nod.getTextContent().equals("album")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad
-				// But True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }
-				// }
-				// System.out.println("si aparece esto no hay error");
 
 				TransformerFactory transformerFactory = TransformerFactory.newInstance();
 				Transformer transformer = transformerFactory.newTransformer();
@@ -178,7 +334,7 @@ public class Servidor {
 				// write to console or file
 				// StreamResult console = new StreamResult(System.out);
 				StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
-
+				
 				// write data
 				// transformer.transform(source, console);
 				transformer.transform(source, file);
@@ -190,11 +346,11 @@ public class Servidor {
 				// System.out.println("Mensaje enviado");
 				// clienteNuevo.close();
 				// servidor.close();
-				// }
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-			// } catch (ClassNotFoundException e) {
+//		} catch (ClassNotFoundException e) {
 			// // TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
@@ -209,16 +365,11 @@ public class Servidor {
 		try {
 			System.out.println("Entramos al try");
 			br = new BufferedReader(new InputStreamReader(is));
-			int ind = 0;
-			int cond = 3;
 			line = br.readLine();
 			sb.append(line);
 			while (line.equals("  </Datos>") != true) {
 				line = br.readLine();
-				// System.out.println(line);
 				sb.append(line);
-				ind++;
-				// System.out.println(ind);
 			}
 			System.out.println("Salimos bien del while");
 
