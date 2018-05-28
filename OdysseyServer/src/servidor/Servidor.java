@@ -296,11 +296,43 @@ public class Servidor {
 					
 					//Por ahora hagamoslo asi para probar
 					User user = new User("luisk","Luis Carlos Mora Fonseca", "20", "pass");
+					/*Esta variable msj se puede volver golbal en ServerFunctions*/ 
 					MensajeXml msj = new MensajeXml();
 					String stringXml = msj.xmlInfoUser(user);
 					resp.println(stringXml);
 					System.out.println("Mensaje enviado");
 					clienteNuevo.close();
+				}else if(nodo.getTextContent().equals("editUsuario")) {
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					NodeList nodos = doc.getElementsByTagName("UsuarioAnt");
+					Node nod = nodos.item(0);
+					//aqui debe ir un metodo que busque el usuario y remplase la info de ese usuario con 
+					//la nueva informacion que se envio.
+					
+					//Por ahora hagamoslo asi para probar
+					nodos = doc.getElementsByTagName("UsuarioNew");
+					nod = nodos.item(0);
+					String newUser = nod.getTextContent().toString();
+					
+					nodos = doc.getElementsByTagName("Nombre");
+					nod = nodos.item(0);
+					String newName = nod.getTextContent().toString();
+					
+					nodos = doc.getElementsByTagName("Edad");
+					nod = nodos.item(0);
+					String newAge = nod.getTextContent().toString();
+					
+					
+					
+					
+					User user = new User(newUser,newName, newAge, "pass");
+					MensajeXml msj = new MensajeXml();
+					String stringXml = msj.xmlInfoUser(user);
+					resp.println(stringXml);
+					System.out.println("Mensaje enviado");
+					clienteNuevo.close();
+					
+					String usuario = nod.getTextContent();
 				}
 
 				TransformerFactory transformerFactory = TransformerFactory.newInstance();
