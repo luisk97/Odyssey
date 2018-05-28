@@ -64,6 +64,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import Sort.ListaEnlazada;
 import Sort.Song;
 import javafx.scene.text.TextAlignment;
+import usuario.User;
 
 /**
  * @author Luis Carlos Mora
@@ -274,57 +275,29 @@ public class Servidor {
 					FileInputStream fis = new FileInputStream(file);
 					fis.read(fileBytes);
 					fis.close();
-//					String encodedStr = nod.getTextContent();
-					// System.out.println(encodedString);
-//					byte[] decodedBytes = Base64.getDecoder().decode(encodedStr);
-//					String la = Base64.getEncoder().encodeToString(src)
-//					byte[] encodedBytes = Base64.getEncoder().encode(fileBytes);
 					String encodedString = Base64.getEncoder().encodeToString(fileBytes);
-					String stringXml = "";
-					try {
-						DocumentBuilderFactory factory2 = DocumentBuilderFactory.newInstance();
-						DocumentBuilder builder2;
-						builder2 = factory2.newDocumentBuilder();
-						Document doc2 = builder2.newDocument();
-
-					    Element root = doc2.createElement("MensajeXML");
-					    doc2.appendChild(root);
+					//toda la construccion de xml ahora se hace en la clase MensajeXml
+					MensajeXml msj = new MensajeXml();
+					String stringXml = msj.xmlPlay(encodedString);
+					resp.println(stringXml);
+					System.out.println("Mensaje enviado");
+					clienteNuevo.close();
+				}else if(nodo.getTextContent().equals("infoUsuario")) {
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					NodeList nodos = doc.getElementsByTagName("Usuario");
+					Node nod = nodos.item(0);
+					String usuario = nod.getTextContent();
+					//aqui debe ir un metodo que busque en la lista de usuarios a ese usuario
+					//y nos debuelva la intancia de la clase User que debe estar contenida en los nodos
+					//de la lista de usuarios que se debe implementar, luego mediante un metodo de la
+					//clase MensajeXml que reciba la clase User se crea un XML con la informacion del 
+					//usuario y retorne un string de ese XML y este se envie por el socket.
 					
-					    Element datos = doc2.createElement("Datos");
-					    root.appendChild(datos);
 					
-					    Element codigo = doc2.createElement("Code");
-					    codigo.appendChild(doc2.createTextNode("toPlay"));
-					    datos.appendChild(codigo);
-					    
-					    Element song = doc2.createElement("Cancion");
-					    datos.appendChild(song);
-					
-					    Element nom = doc2.createElement("Bytes");
-					    nom.appendChild(doc2.createTextNode(encodedString));
-					    song.appendChild(nom);
-					
-					    datos.appendChild(song);
-					        
-//					        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//							Transformer transformer = transformerFactory.newTransformer();
-//							transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-//							DOMSource source = new DOMSource(doc);
-//							
-//							StreamResult file = new StreamResult(new File("C:\\xml\\canciones.xml"));
-//							transformer.transform(source, file);
-							
-						TransformerFactory tf = TransformerFactory.newInstance();
-						Transformer t = tf.newTransformer();
-						StringWriter sw = new StringWriter();
-						t.transform(new DOMSource(doc2), new StreamResult(sw));
-						stringXml = sw.toString();
-							
-					}catch (Exception e) {
-						e.printStackTrace();
-					}
-//					System.out.println(stringXml);
-//					resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><MensajeXML><Datos><Code>toPlay</Code><Cancion><Bytes>SUQzBAAAAAAJMFRJVDIAAAAJAAAAQXBsYXVzb3NUUEUxAAAABgAAAG1hbm9zVEFMQgAAAAwAAABjZWxlYnJhY2lvblRDT04AAAAGAAAAcnVpZG9VU0xUAAAAFAAAAGVuZwBwbGEgcGxhIHBsYSBwbGEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</Bytes></Cancion></Datos></MensajeXML>");
+					//Por ahora hagamoslo asi para probar
+					User user = new User("luisk","Luis Carlos Mora Fonseca", "20", "pass");
+					MensajeXml msj = new MensajeXml();
+					String stringXml = msj.xmlInfoUser(user);
 					resp.println(stringXml);
 					System.out.println("Mensaje enviado");
 					clienteNuevo.close();
