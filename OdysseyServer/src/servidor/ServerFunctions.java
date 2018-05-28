@@ -45,6 +45,7 @@ import Sort.ListaEnlazada;
 import Sort.QuickSort;
 import Sort.Song;
 import jdk.internal.dynalink.linker.LinkerServices.Implementation;
+import usuario.User;
 
 /**
  * @author Daniel Acuña Mora
@@ -101,7 +102,7 @@ public class ServerFunctions {
 
 			clienteNuevo.close();
 
-			createJson(nodos, doc,"casa");
+			createJson(nodos, doc,path,"songs");
 			System.out.println("Canciones en arrayList:");
 			for (int i = 0; i < songs.size(); i++) {
 				System.out.println(songs.get(i).getTitle());
@@ -115,6 +116,7 @@ public class ServerFunctions {
 		}
 		
 	}
+
 	
 
 	/**
@@ -123,7 +125,7 @@ public class ServerFunctions {
 	 * @throws JsonGenerationException
 	 * 
 	 */
-	public static void createJson(NodeList n, Document d,String p)
+	public static void createJson(NodeList n, Document d,String p,String filename)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		String path = p;
 		NodeList nodos = n;
@@ -141,29 +143,18 @@ public class ServerFunctions {
 		songs.get(0).setPath(path);
 		Servidor.canciones.add(songs.get(0));
 
-		File file = new File("canciones.json");
+		File file = new File(filename+".json");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(file, songs);
 		// TODO Auto-generated method stub
 		//System.out.println("Vieja cancion:"+songs.get(1).getTitle());
 		System.out.println("Nueva cancion:"+songs.get(0).getTitle());
-
 	}
+
 	public static void writeXmlFile() {
-		//aqui cambiar este ArrayList por una SongList si se desea
-//		ArrayList<Song> songs = Servidor.songs;
+
 		ListaEnlazada songs = Servidor.canciones;
-//		XmlMapper xmlmapper = new XmlMapper();
-//		String xml1 = null;
-//		File xml = new File("canciones.xml");
-//		try {
-//		    xml1 = xmlmapper.writeValueAsString(songs);		
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		;
-//		System.out.println(xml1);
+
 		
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -269,5 +260,50 @@ public class ServerFunctions {
 			System.out.println("Mensaje enviado");
 			clienteNuevo.close();
 		 }
+	}
+	public static void addUser(Socket s, Document d) throws IOException {
+		Document doc = d;
+		Socket clienteNuevo = s;
+
+		System.out.println("Se esta registrando un usuario");
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("User");
+		Node nod1 = nodos.item(0);
+		//string confirmacion = algunMetodoQueValidaSiYaExisteElUsuario(nod1.getTextContent(),nod2.getTextContent());
+		//Por ahora lo validaremos asi para ver si sirve:
+		if(!Trees.BinarySearchTree.searchUser(nod1.getTextContent())) {
+			nodos = doc.getElementsByTagName("FullName");
+			Node nod2 = nodos.item(0);
+			nodos = doc.getElementsByTagName("Age");
+			Node nod3 = nodos.item(0);
+			nodos = doc.getElementsByTagName("Password");
+			Node nod4 = nodos.item(0);
+			System.out.println("El usuario se registro con exito!");
+			System.out.println("Respondiendo al cliente");
+			resp.println("exito");
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
+		}else{
+			System.out.println("El usuario que se desea registrar ya existe!");
+			System.out.println("Respondiendo al cliente");
+			resp.println("usuario existente");
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
+		}
+	}
+	public static void generateUsers() throws JsonGenerationException, JsonMappingException, IOException {
+		songs.add(0, new Song());
+		ArrayList<User> users = Servidor.users;
+		//songs.add(new Song());
+		String[] tags = new String[] { "Daniel", "Greivin", "Luisk", "Elba leado" };
+
+		for (int i = 0; i < tags.length; i++) {
+			users.add(new User());	
+			users.get(i).setUsuario(tags[i]);
+		}
+		File file = new File("Users.json");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(file, users);
+		
 	}
 }

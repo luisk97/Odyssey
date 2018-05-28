@@ -1,8 +1,10 @@
 package Trees;
 
+import usuario.User;
+
 public class BinarySearchTree{
 	
-	private BSTNode root;
+	private static BSTNode root;
 	
 	public BinarySearchTree() {
 		this.root = null;
@@ -16,17 +18,17 @@ public class BinarySearchTree{
 		this.root = root;
 	}
 	
-	public void add(String element) {
+	public void add(User element) {
 		this.root = this.add(element, this.root);
 	}
 	
-	private BSTNode add(String element, BSTNode current) {
+	private BSTNode add(User element, BSTNode current) {
 		if (current == null) {
 			return new BSTNode(element);
 		}
-		if (element.compareTo(current.elemento) < 0) {
+		if (element.getUsuario().compareTo(current.elemento.getUsuario()) < 0) {
 			current.left = this.add(element, current.left);
-		}else if (element.compareTo(current.elemento) > 0) {
+		}else if (element.getUsuario().compareTo(current.elemento.getUsuario()) > 0) {
 			current.right = this.add(element, current.right);
 		}
 		return current;
@@ -50,17 +52,17 @@ public class BinarySearchTree{
 		}
 	}
 	
-	public BSTNode delete(String element) {
+	public BSTNode delete(User element) {
 		return delete(element, this.root);
 	}
 	
-	public BSTNode delete(String element, BSTNode nodo) {
+	public BSTNode delete(User element, BSTNode nodo) {
 		if (nodo == null) {
 			return nodo;
 		}
-		if (element.compareTo(nodo.elemento) < 0) {
+		if (element.getUsuario().compareTo(nodo.elemento.getUsuario()) < 0) {
 			nodo.left = delete(element, nodo.left);
-		}else if(element.compareTo(nodo.elemento) > 0) {
+		}else if(element.getUsuario().compareTo(nodo.elemento.getUsuario()) > 0) {
 			nodo.right = delete(element, nodo.right);
 		}else if (nodo.left != null && nodo.right != null) {
 			nodo.elemento = findMin(nodo.right).elemento;
@@ -79,14 +81,30 @@ public class BinarySearchTree{
 		if (current == null) {
 			return "No se encuentra ese dato";
 		}else {
-			if (element.compareTo(current.elemento) < 0) {
+			if (element.compareTo(current.elemento.getUsuario()) < 0) {
 				return search(element, current.left);
-			}else if(element.compareTo(current.elemento) > 0) {
+			}else if(element.compareTo(current.elemento.getUsuario()) > 0) {
 				return search(element, current.right);
 			}else {
 				return String.valueOf(current.elemento);
 			}
 		}
 	}
-	
+	public static boolean searchUser(String element, BSTNode current) {
+		if (current == null) {
+			return false;
+		}else {
+			if (element.compareTo(current.elemento.getUsuario()) < 0) {
+				return searchUser(element, current.left);
+			}else if(element.compareTo(current.elemento.getUsuario()) > 0) {
+				return searchUser(element, current.right);
+			}else {
+				return true;
+			}
+		}
+	}
+	public static boolean searchUser(String user) {
+		return searchUser(user,root);
+		
+	}
 }
