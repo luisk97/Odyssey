@@ -40,11 +40,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.sun.xml.internal.txw2.annotation.XmlElement;
 
-import SongMgmt.Song;
+import Sort.BubbleSort;
+import Sort.ListaEnlazada;
+import Sort.QuickSort;
+import Sort.Song;
 import jdk.internal.dynalink.linker.LinkerServices.Implementation;
 
 /**
  * @author Daniel Acuña Mora
+ * @author Luis Carlos Mora
  *
  */
 public class ServerFunctions {
@@ -98,8 +102,15 @@ public class ServerFunctions {
 			clienteNuevo.close();
 
 			createJson(nodos, doc,"casa");
+			System.out.println("Canciones en arrayList:");
 			for (int i = 0; i < songs.size(); i++) {
-				System.out.println(songs.get(i).getTitle());}
+				System.out.println(songs.get(i).getTitle());
+			}
+			
+			System.out.println("Canciones en ListaEnlazada:");
+			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+				System.out.println(Servidor.canciones.getNodo(i).getSong().getTitle());
+			}
 
 		}
 		
@@ -128,6 +139,7 @@ public class ServerFunctions {
 			songs.get(0).set(tags[i], nod.getTextContent());
 		}
 		songs.get(0).setPath(path);
+		Servidor.canciones.add(songs.get(0));
 
 		File file = new File("canciones.json");
 		ObjectMapper mapper = new ObjectMapper();
@@ -139,7 +151,8 @@ public class ServerFunctions {
 	}
 	public static void writeXmlFile() {
 		//aqui cambiar este ArrayList por una SongList si se desea
-		ArrayList<Song> songs = Servidor.songs;
+//		ArrayList<Song> songs = Servidor.songs;
+		ListaEnlazada songs = Servidor.canciones;
 //		XmlMapper xmlmapper = new XmlMapper();
 //		String xml1 = null;
 //		File xml = new File("canciones.xml");
@@ -169,8 +182,8 @@ public class ServerFunctions {
 	        datos.appendChild(codigo);
 	
 	        Song temp;
-	        for (int i = 0; i < songs.size(); i++) {
-	        	temp = songs.get(i);
+	        for (int i = 0; i < songs.getLarge(); i++) {
+	        	temp = songs.getNodo(i).getSong();
 	            Element song = doc.createElement("Cancion");
 	            datos.appendChild(song);
 	
@@ -223,77 +236,38 @@ public class ServerFunctions {
 		//Aqui valida si se desea ordenar por nombre, artista o album
 		if(nod.getTextContent().equals("nombre")) {
 			System.out.println("Ordenando lista de canciones por nombre");
-			//Mae esto es provicional para que me mande todas las canciones pero ahi lo hace en una funcion es basicamente
-			//la misma funcion writeXmlFile() pero que reciba una lista se supone que ordenada por lo que se le pide y
-			//devuelva el xml que seria stringXml = sw.toString(); y que retorne stringXml para enviarlo
-			ArrayList<Song> songs = Servidor.songs;
-			try {
-				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder builder;
-				builder = factory.newDocumentBuilder();
-				Document doc = builder.newDocument();
-
-			    Element root = doc.createElement("MensajeXML");
-			    doc.appendChild(root);
 			
-			    Element datos = doc.createElement("Datos");
-			    root.appendChild(datos);
+			ListaEnlazada songs = Servidor.canciones;
 			
-			    Element codigo = doc.createElement("Code");
-			    codigo.appendChild(doc.createTextNode("ordenadas"));
-			    datos.appendChild(codigo);
+			QuickSort Q = new QuickSort();
+			Q.quicksort(songs);
 			
-//			    Song temp;
-			    for (int i = 0; i < songs.size(); i++) {
-			    	Element song = doc.createElement("Cancion");
-			        datos.appendChild(song);
-			
-			        Element nom = doc.createElement("Nombre");
-			        nom.appendChild(doc.createTextNode(songs.get(i).getTitle()+""));
-			        song.appendChild(nom);
-			
-			        Element art = doc.createElement("Artista");
-			        art.appendChild(doc.createTextNode(songs.get(i).getArtist()+""));
-			        song.appendChild(art);
-			
-			        Element album = doc.createElement("Album");
-			        album.appendChild(doc.createTextNode(songs.get(i).getAlbum()+""));
-			        song.appendChild(album);
-			
-			        Element gen = doc.createElement("Genero");
-			        gen.appendChild(doc.createTextNode(songs.get(i).getGenere()+""));
-			        song.appendChild(gen);
-			            
-			        Element letra = doc.createElement("Letra");
-			        letra.appendChild(doc.createTextNode(songs.get(i).getLyrics()+""));
-			        song.appendChild(letra);
-			
-			        datos.appendChild(song);
-			    }
-					
-					TransformerFactory tf = TransformerFactory.newInstance();
-					Transformer t = tf.newTransformer();
-					StringWriter sw = new StringWriter();
-					t.transform(new DOMSource(doc), new StreamResult(sw));
-					stringXml = sw.toString();
-					
-				}catch (Exception e) {
-					e.printStackTrace();
-				}
+			MensajeXml msj = new MensajeXml();
+			stringXml = msj.xmlListaCanciones(songs);
 			 
-			 resp.println(stringXml);
-			 System.out.println("Mensaje enviado");
-			 clienteNuevo.close();
+			resp.println(stringXml);
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
 		 }else if(nod.getTextContent().equals("artista")) {
-			 System.out.println("Respondiendo al cliente");
-			 resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><MensajeXML><Code>ordenadas</Code><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion></MensajeXML>");
-			 System.out.println("Mensaje enviado");
-			 clienteNuevo.close();
+			
+			System.out.println("Respondiendo al cliente");
+			resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><MensajeXML><Code>ordenadas</Code><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion></MensajeXML>");
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
 		 }else if(nod.getTextContent().equals("album")) {
-			 System.out.println("Respondiendo al cliente");
-			 resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><MensajeXML><Code>ordenadas</Code><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>EnterSadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion></MensajeXML>");
-			 System.out.println("Mensaje enviado");
-			 clienteNuevo.close();
+			System.out.println("Ordenando lista de canciones por album");
+				
+			ListaEnlazada songs = Servidor.canciones;
+			
+			BubbleSort B = new BubbleSort();
+			B.bubbleSort(songs);
+				
+			MensajeXml msj = new MensajeXml();
+			stringXml = msj.xmlListaCanciones(songs);
+				 
+			resp.println(stringXml);
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
 		 }
 	}
 }

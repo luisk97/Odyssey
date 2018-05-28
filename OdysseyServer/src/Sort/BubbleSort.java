@@ -1,28 +1,28 @@
 package Sort;
-//
+
 public class BubbleSort {
-//
-//	public  void bubbleSort(LinkedList list) {
-//
-//		if (list.getLarge() > 1) {
-//
-//			for (int i = 0; i < list.getLarge(); i++ ) {
-//
-//				Nodo current = list.getHead();
-//				Nodo next = list.getHead().getNext();
-//				for (int j = 0; j < list.getLarge() - 1; j++) {
-//
-//					if (current.getDato().compareTo(next.getDato()) > 0) {
-//
-//						String temp = current.getDato();
-//						current.setDato(next.getDato());
-//						next.setDato(temp);
-//
-//					} 
-//					current = next;
-//					next = next.getNext();   
-//				}
-//			}
-//		}
-//	}
+
+	public  void bubbleSort(ListaEnlazada list) {
+
+		if (list.getLarge() > 1) {
+
+			for (int i = 0; i < list.getLarge(); i++ ) {
+
+				Nodo current = list.getHead();
+				Nodo next = list.getHead().getNext();
+				for (int j = 0; j < list.getLarge() - 1; j++) {
+
+					if (current.getSong().getAlbum().compareTo(next.getSong().getAlbum()) > 0) {
+
+						Song temp = current.getSong();
+						current.setSong(next.getSong());
+						next.setSong(temp);
+
+					} 
+					current = next;
+					next = next.getNext();   
+				}
+			}
+		}
+	}
 }

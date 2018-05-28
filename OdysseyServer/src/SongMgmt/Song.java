@@ -12,9 +12,8 @@ public class Song {
 
 	public Song(String t, String a, String g) {
 		this.setTitle(t);
-		this.setAlbum(a);
-		this.setGenere(g);
-
+		this.setArtist(a);
+		this.setAlbum(g);
 	}
 
 	public Song() {

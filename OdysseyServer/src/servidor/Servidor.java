@@ -61,15 +61,17 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import SongMgmt.Song;
+import Sort.ListaEnlazada;
+import Sort.Song;
 import javafx.scene.text.TextAlignment;
 
 /**
- * @author luisk
- * @author Daniel2443
+ * @author Luis Carlos Mora
+ * @author Daniel Acuña Mora
  */
 public class Servidor {
-	protected static ArrayList<Song> songs = new ArrayList<>();;
+	protected static ArrayList<Song> songs = new ArrayList<>();
+	public static ListaEnlazada canciones = new ListaEnlazada();
 
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
 		try {
@@ -77,6 +79,9 @@ public class Servidor {
 			ObjectMapper mapper = new ObjectMapper();
 			songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
 			});
+			for(int i = 0; i < songs.size(); i++) {
+				canciones.add(songs.get(i));
+			}
 		}catch(IOException e) {
 			System.out.println("No hay Jsons");
 		}
