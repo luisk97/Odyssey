@@ -19,7 +19,7 @@ import Sort.ListaEnlazada;
 
 /**
  * @author Luis Carlos Mora Fonseca
- *
+ * En esta clase se construyen los mensajes xml para enviarlos al cliente
  */
 public class MensajeXml {
 	
