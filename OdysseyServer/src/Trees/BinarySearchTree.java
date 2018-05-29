@@ -18,18 +18,18 @@ public class BinarySearchTree{
 		this.root = root;
 	}
 	
-	public void add(User element) {
-		this.root = this.add(element, this.root);
+	public static void add(User element) {
+		root = add(element, root);
 	}
 	
-	private BSTNode add(User element, BSTNode current) {
+	private static BSTNode add(User element, BSTNode current) {
 		if (current == null) {
 			return new BSTNode(element);
 		}
 		if (element.getUsuario().compareTo(current.elemento.getUsuario()) < 0) {
-			current.left = this.add(element, current.left);
+			current.left = add(element, current.left);
 		}else if (element.getUsuario().compareTo(current.elemento.getUsuario()) > 0) {
-			current.right = this.add(element, current.right);
+			current.right = add(element, current.right);
 		}
 		return current;
 	}
@@ -73,37 +73,37 @@ public class BinarySearchTree{
 		return nodo;
 	}
 	
-	public String search(String element) {
+	public static boolean search(String element) {
 		return search(element, root);
 	}
 	
-	public String search(String element, BSTNode current) {
+	public static boolean search(String element, BSTNode current) {
 		if (current == null) {
-			return "No se encuentra ese dato";
-		}else {
+			return false;		
+			}else {
 			if (element.compareTo(current.elemento.getUsuario()) < 0) {
 				return search(element, current.left);
 			}else if(element.compareTo(current.elemento.getUsuario()) > 0) {
 				return search(element, current.right);
 			}else {
-				return String.valueOf(current.elemento);
+				return true;
 			}
 		}
 	}
-	public static boolean searchUser(String element, BSTNode current) {
+	public static User searchUser(String element, BSTNode current) {
 		if (current == null) {
-			return false;
+			return null;
 		}else {
 			if (element.compareTo(current.elemento.getUsuario()) < 0) {
 				return searchUser(element, current.left);
 			}else if(element.compareTo(current.elemento.getUsuario()) > 0) {
 				return searchUser(element, current.right);
 			}else {
-				return true;
+				return current.elemento;
 			}
 		}
 	}
-	public static boolean searchUser(String user) {
+	public static User searchUser(String user) {
 		return searchUser(user,root);
 		
 	}

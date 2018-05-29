@@ -89,15 +89,19 @@ public class Servidor {
 				canciones.add(songs.get(i));
 			}
 			System.out.println("Se cargaron las canciones");
+		}catch(IOException e) {
+			System.out.println("No hay Jsons de Canciones");
+		}
+		try {
 			File userfile = new File("Users.json");
 			users = mapper.readValue(userfile, new TypeReference<ArrayList<User>>() {
 			});
 			System.out.println("Se cargaron los usuarios");
-//			for(int i=0; i < users.size();i++) {
-//				usertree.add(users.get(i));
-//			}
+			for(int i=0; i < users.size();i++) {
+				usertree.add(users.get(i));
+			}
 		}catch(IOException e) {
-			System.out.println("No hay Jsons de Canciones");
+			System.out.println("No hay jsons de usuarios");
 		}
 	}
 
@@ -122,8 +126,8 @@ public class Servidor {
 			e1.printStackTrace();
 		}
 
-		for (int i = 0; i < users.size(); i++)
-			System.out.println(users.get(i).getUsuario());
+//		for (int i = 0; i < users.size(); i++)
+//			System.out.println(users.get(i).getUsuario());
 		try {
 			System.out.println("entramos al try");
 			ServerSocket servidor = new ServerSocket(8000);
@@ -184,9 +188,10 @@ public class Servidor {
 					// string confirmacion =
 					// algunMetodoQueValidaUsuario(nod1.getTextContent(),nod2.getTextContent());
 					// Por ahora lo validaremos asi para ver si sirve:
+					String username = nod1.getTextContent();
 					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					if (nod1.getTextContent().equals("luisk")) {
-						if (nod2.getTextContent().equals("pass")) {
+					if (BinarySearchTree.search(username)) {
+						if (nod2.getTextContent().equals(BinarySearchTree.searchUser(username).getPassword())) {
 							System.out.println("Se concedio el acceso al usuario");
 							System.out.println("Respondiendo al cliente");
 							resp.println("acceso permitido");
