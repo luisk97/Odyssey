@@ -2,59 +2,40 @@ package Sort;
 
 public class RadixSort {
 	
-	public void radix(int[] arreglo) {
-		int x, i, j;
-		for (x = Integer.SIZE - 1; x >= 0; x--) {
-			int auxiliar[] = new int[arreglo.length];
-			j = 0;
-			for(i = 0; i < arreglo.length; i++) {
-				boolean mover = arreglo[i] << x >= 0;
-				if (x == 0 ? !mover:mover) {
-					auxiliar[j] = arreglo[i];
-					j ++;
-				}else {
-					arreglo[i - j] = arreglo[i];
-				}
-			}
-			for (i = j; i < auxiliar.length; i ++) {
-				auxiliar[i] = arreglo[i - j];
-			}
-			arreglo = auxiliar;
-		}
-		
+	public ListaEnlazada radix(ListaEnlazada list) {
+		return radix(list, 0, list.getLarge() - 1);
 	}
 	
-	public void radixSort(int[] arr){
-        if(arr.length == 0)
-            return;
-        int[][] np = new int[arr.length][2];
-        int[] q = new int[0x100];
-        int i,j,k,l,f = 0;
-        for(k=0;k<4;k++){
-            for(i=0;i<(np.length-1);i++)
-                np[i][1] = i+1;
-            np[i][1] = -1;
-            for(i=0;i<q.length;i++)
-                q[i] = -1;
-            for(f=i=0;i<arr.length;i++){
-                j = ((0xFF<<(k<<3))&arr[i])>>(k<<3);
-                if(q[j] == -1)
-                    l = q[j] = f;
-                else{
-                    l = q[j];
-                    while(np[l][1] != -1)
-                        l = np[l][1];
-                    np[l][1] = f;
-                    l = np[l][1];
-                }
-                f = np[f][1];
-                np[l][0] = arr[i];
-                np[l][1] = -1;
-            }
-            for(l=q[i=j=0];i<q.length;i++)
-                for(l=q[i];l!=-1;l=np[l][1])
-                        arr[j++] = np[l][0];
-        }
-    }
-	
+	public ListaEnlazada radix(ListaEnlazada list, int left, int right) {
+		if(left >= right) {
+			return list;
+		}
+		int izquierda = left, derecha= right;
+		if (left != right) {
+			int pivote;
+			Song aux;
+			pivote = left;
+			while(left != right) {
+				while(list.getNodo(right).getSong().getArtist().compareToIgnoreCase(list.getNodo(pivote).getSong().getArtist()) >= 0 && left < right) {
+					right --;
+				}
+				while(list.getNodo(left).getSong().getArtist().compareToIgnoreCase(list.getNodo(pivote).getSong().getArtist()) < 0 && left < right) {
+					left ++;	
+				}
+				if (right != left) {
+					aux = list.getNodo(right).getSong();
+					list.getNodo(right).setSong(list.getNodo(left).getSong());
+					list.getNodo(left).setSong(aux);
+				}
+				if (left == right) {
+					radix(list, izquierda, left - 1);
+					radix(list, left + 1, derecha);
+				}
+			}
+		}
+		else {
+			return list;
+		}
+		return list;
+	}
 }

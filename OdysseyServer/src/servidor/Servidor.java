@@ -111,20 +111,14 @@ public class Servidor {
 	 * @throws TagException
 	 * @throws IOException
 	 */
-	public static void sendXml() throws Exception {
-		ServerFunctions.writeXmlFile();
-	}
+//	public static void sendXml() throws Exception {
+//		ServerFunctions.writeXmlFile();
+//	}
 
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
 		//ServerFunctions.generateUsers();
 		loadJson();
-		try {
-			sendXml();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 
 //		for (int i = 0; i < users.size(); i++)
 //			System.out.println(users.get(i).getUsuario());
@@ -222,20 +216,20 @@ public class Servidor {
 					ServerFunctions.infoUsuario(clienteNuevo,doc);
 				}
 
-				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-				Transformer transformer = transformerFactory.newTransformer();
-				// for pretty print
-				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-				DOMSource source = new DOMSource(doc);
-				System.out.println();
-				// write to console or file
-				// StreamResult console = new StreamResult(System.out);
-				StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
-
-				// write data
-				// transformer.transform(source, console);
-				transformer.transform(source, file);
-				System.out.println("DONE");
+//				TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//				Transformer transformer = transformerFactory.newTransformer();
+//				// for pretty print
+//				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+//				DOMSource source = new DOMSource(doc);
+//				System.out.println();
+//				// write to console or file
+//				// StreamResult console = new StreamResult(System.out);
+//				StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
+//
+//				// write data
+//				// transformer.transform(source, console);
+//				transformer.transform(source, file);
+//				System.out.println("DONE");
 
 				// System.out.println("Respondiendo al cliente");
 				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());

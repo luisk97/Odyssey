@@ -16,10 +16,10 @@ public class QuickSort {
 			Song aux;
 			pivote = left;
 			while(left != right) {
-				while(list.getNodo(right).getSong().getTitle().compareTo(list.getNodo(pivote).getSong().getTitle()) >= 0 && left < right) {
+				while(list.getNodo(right).getSong().getTitle().compareToIgnoreCase(list.getNodo(pivote).getSong().getTitle()) >= 0 && left < right) {
 					right --;
 				}
-				while(list.getNodo(left).getSong().getTitle().compareTo(list.getNodo(pivote).getSong().getTitle()) < 0 && left < right) {
+				while(list.getNodo(left).getSong().getTitle().compareToIgnoreCase(list.getNodo(pivote).getSong().getTitle()) < 0 && left < right) {
 					left ++;	
 				}
 				if (right != left) {

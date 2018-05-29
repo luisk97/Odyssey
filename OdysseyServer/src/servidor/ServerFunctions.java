@@ -43,6 +43,7 @@ import com.sun.xml.internal.txw2.annotation.XmlElement;
 import Sort.BubbleSort;
 import Sort.ListaEnlazada;
 import Sort.QuickSort;
+import Sort.RadixSort;
 import Sort.Song;
 import Trees.BinarySearchTree;
 import jdk.internal.dynalink.linker.LinkerServices.Implementation;
@@ -152,69 +153,69 @@ public class ServerFunctions {
 		System.out.println("Nueva cancion:"+songs.get(0).getTitle());
 	}
 
-	public static void writeXmlFile() {
-
-		ListaEnlazada songs = Servidor.canciones;
-
-		
-		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder;
-			builder = factory.newDocumentBuilder();
-			Document doc = builder.newDocument();
-
-	        Element root = doc.createElement("MensajeXML");
-	        doc.appendChild(root);
-	
-	        Element datos = doc.createElement("Datos");
-	        root.appendChild(datos);
-	
-	        Element codigo = doc.createElement("Code");
-	        codigo.appendChild(doc.createTextNode("ordenadas"));
-	        datos.appendChild(codigo);
-	
-	        Song temp;
-	        for (int i = 0; i < songs.getLarge(); i++) {
-	        	temp = songs.getNodo(i).getSong();
-	            Element song = doc.createElement("Cancion");
-	            datos.appendChild(song);
-	
-	            Element nom = doc.createElement("Nombre");
-	            nom.appendChild(doc.createTextNode(temp.getTitle()+""));
-	            song.appendChild(nom);
-	
-	            Element art = doc.createElement("Artista");
-	            art.appendChild(doc.createTextNode(temp.getArtist()+""));
-	            song.appendChild(art);
-	
-	            Element album = doc.createElement("Album");
-	            album.appendChild(doc.createTextNode(temp.getAlbum()+""));
-	            song.appendChild(album);
-	
-	            Element gen = doc.createElement("Genero");
-	            gen.appendChild(doc.createTextNode(temp.getGenere()+""));
-	            song.appendChild(gen);
-	
-	            datos.appendChild(song);
-	        }
-	        
-	        //Esto es para guardar el xml como archivo en disco pero no hace falta despues cuando
-	        //no se ocupe ver como queda el xml se puede quitar
-	        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			DOMSource source = new DOMSource(doc);
-			StreamResult file = new StreamResult(new File("C:\\xml\\canciones.xml"));
-			transformer.transform(source, file);
-			
-			
-			
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-	
+//	public static void writeXmlFile() {
+//
+//		ListaEnlazada songs = Servidor.canciones;
+//
+//		
+//		try {
+//			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+//			DocumentBuilder builder;
+//			builder = factory.newDocumentBuilder();
+//			Document doc = builder.newDocument();
+//
+//	        Element root = doc.createElement("MensajeXML");
+//	        doc.appendChild(root);
+//	
+//	        Element datos = doc.createElement("Datos");
+//	        root.appendChild(datos);
+//	
+//	        Element codigo = doc.createElement("Code");
+//	        codigo.appendChild(doc.createTextNode("ordenadas"));
+//	        datos.appendChild(codigo);
+//	
+//	        Song temp;
+//	        for (int i = 0; i < songs.getLarge(); i++) {
+//	        	temp = songs.getNodo(i).getSong();
+//	            Element song = doc.createElement("Cancion");
+//	            datos.appendChild(song);
+//	
+//	            Element nom = doc.createElement("Nombre");
+//	            nom.appendChild(doc.createTextNode(temp.getTitle()+""));
+//	            song.appendChild(nom);
+//	
+//	            Element art = doc.createElement("Artista");
+//	            art.appendChild(doc.createTextNode(temp.getArtist()+""));
+//	            song.appendChild(art);
+//	
+//	            Element album = doc.createElement("Album");
+//	            album.appendChild(doc.createTextNode(temp.getAlbum()+""));
+//	            song.appendChild(album);
+//	
+//	            Element gen = doc.createElement("Genero");
+//	            gen.appendChild(doc.createTextNode(temp.getGenere()+""));
+//	            song.appendChild(gen);
+//	
+//	            datos.appendChild(song);
+//	        }
+//	        
+//	        //Esto es para guardar el xml como archivo en disco pero no hace falta despues cuando
+//	        //no se ocupe ver como queda el xml se puede quitar
+//	        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//			Transformer transformer = transformerFactory.newTransformer();
+//			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+//			DOMSource source = new DOMSource(doc);
+//			StreamResult file = new StreamResult(new File("C:\\xml\\canciones.xml"));
+//			transformer.transform(source, file);
+//			
+//			
+//			
+//		}catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//	}
+//	
 	
 	
 	public static void sortSongs(Socket s,Document d) throws IOException {
@@ -241,11 +242,19 @@ public class ServerFunctions {
 			System.out.println("Mensaje enviado");
 			clienteNuevo.close();
 		 }else if(nod.getTextContent().equals("artista")) {
-			
-			System.out.println("Respondiendo al cliente");
-			resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><MensajeXML><Code>ordenadas</Code><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion></MensajeXML>");
-			System.out.println("Mensaje enviado");
-			clienteNuevo.close();
+				System.out.println("Ordenando lista de canciones por artista");
+				
+				ListaEnlazada songs = Servidor.canciones;
+				
+				RadixSort R = new RadixSort();
+				R.radix(songs);
+				
+				MensajeXml msj = new MensajeXml();
+				stringXml = msj.xmlListaCanciones(songs);
+				 
+				resp.println(stringXml);
+				System.out.println("Mensaje enviado");
+				clienteNuevo.close();
 		 }else if(nod.getTextContent().equals("album")) {
 			System.out.println("Ordenando lista de canciones por album");
 				
@@ -384,7 +393,7 @@ public class ServerFunctions {
 			clienteNuevo.close();
 		}
 	}
-	private static void infoUsuario(Socket clienteNuevo, Document doc) throws IOException {
+	protected static void infoUsuario(Socket clienteNuevo, Document doc) throws IOException {
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 		NodeList nodos = doc.getElementsByTagName("Usuario");
 		Node nod = nodos.item(0);
@@ -399,7 +408,7 @@ public class ServerFunctions {
 		// usuario y retorne un string de ese XML y este se envie por el socket.
 
 		// Por ahora hagamoslo asi para probar
-		User user = new User("luisk", "Luis Carlos Mora Fonseca", "20", "pass");
+		User user = BinarySearchTree.searchUser(usuario);
 		MensajeXml msj = new MensajeXml();
 		String stringXml = msj.xmlInfoUser(user);
 		resp.println(stringXml);
