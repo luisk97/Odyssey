@@ -1,26 +1,13 @@
 /**
  * 
  */
-package SongMgmt;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+package Sort;
 
 /**
  * @author Daniel Acuña Mora
  *
  */
-
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.Root;
-@JacksonXmlRootElement(localName = "Song") 
-@XmlRootElement( name = "Song")
-@Root
-
 public class Song {
-    @JacksonXmlElementWrapper(useWrapping = false)
 	private String title, album, genere, artist, lyrics, path;
 
 	public Song(String t, String a, String g) {

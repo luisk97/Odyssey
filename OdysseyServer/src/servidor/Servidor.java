@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -21,6 +22,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -58,39 +60,64 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.sun.javafx.fxml.expression.BinaryExpression;
 
-import SongMgmt.Song;
+import Sort.ListaEnlazada;
+import Sort.Song;
+import Trees.BinarySearchTree;
 import javafx.scene.text.TextAlignment;
+import usuario.User;
 
 /**
- * @author luisk
- * @author Daniel2443
+ * @author Luis Carlos Mora
+ * @author Daniel Acuña Mora
  */
 public class Servidor {
-	protected static ArrayList<Song> songs = new ArrayList<>();;
+	protected static ArrayList<Song> songs = new ArrayList<>();
+	protected static ArrayList<User> users = new ArrayList<>();
+	public static ListaEnlazada canciones = new ListaEnlazada();
+	protected static BinarySearchTree usertree = new BinarySearchTree();
 
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+
 		try {
-			File file = new File("canciones.json");
-			ObjectMapper mapper = new ObjectMapper();
-			songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
+			File songfile = new File("Songs.json");
+			songs = mapper.readValue(songfile, new TypeReference<ArrayList<Song>>() {
 			});
+			for(int i = 0; i < songs.size(); i++) {
+				canciones.add(songs.get(i));
+			}
+			System.out.println("Se cargaron las canciones");
 		}catch(IOException e) {
-			System.out.println("No hay Jsons");
+			System.out.println("No hay Jsons de Canciones");
+		}
+		try {
+			File userfile = new File("Users.json");
+			users = mapper.readValue(userfile, new TypeReference<ArrayList<User>>() {
+			});
+			System.out.println("Se cargaron los usuarios");
+			for(int i=0; i < users.size();i++) {
+				usertree.add(users.get(i));
+			}
+		}catch(IOException e) {
+			System.out.println("No hay jsons de usuarios");
 		}
 	}
 
 	/**
 	 * @param args
-	 * @throws Exception 
+	 * @throws Exception
 	 * @throws TagException
 	 * @throws IOException
 	 */
 	public static void sendXml() throws Exception {
 		ServerFunctions.writeXmlFile();
 	}
+
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
+		//ServerFunctions.generateUsers();
 		loadJson();
 		try {
 			sendXml();
@@ -98,11 +125,9 @@ public class Servidor {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
-		
-		for (int i = 0; i < songs.size(); i++)
-			System.out.println(songs.get(i).getTitle());
-		// setMeta();
+
+//		for (int i = 0; i < users.size(); i++)
+//			System.out.println(users.get(i).getUsuario());
 		try {
 			System.out.println("entramos al try");
 			ServerSocket servidor = new ServerSocket(8000);
@@ -131,59 +156,71 @@ public class Servidor {
 				Node nodo = listaNodos.item(0);
 				if (nodo.getTextContent().equals("add")) {
 					ServerFunctions.addSong(doc, clienteNuevo, lel);
-
+				} else if (nodo.getTextContent().equals("cargar")) {
+					ServerFunctions.sortSongs(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("eliminar")) {
+					NodeList nodos = doc.getElementsByTagName("Cancion");
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					if (nodos.getLength() > 0) {
+						System.out.println("Se eliminaran las siguientes canciones:");
+						for (int i = 0; i < nodos.getLength(); i++) {
+							System.out.println(nodos.item(i).getTextContent());
+							// Aqui debe ir el metodo para eliminar las canciones que vienen en la NodeList
+							// y tiene que
+							// eliminarlas de la SongList y borrar el archivo .mp3
+						}
+						System.out.println("Respondiendo al cliente");
+						resp.println("Las canciones se eliminaron correctamente");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					} else {
+						System.out.println("Respondiendo al cliente");
+						resp.println("No se eligio ninguna cancion para eliminar");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}
+				} else if (nodo.getTextContent().equals("logIn")) {
+					System.out.println("Un usuario esta iniciando sesion");
+					NodeList nodos = doc.getElementsByTagName("User");
+					Node nod1 = nodos.item(0);
+					nodos = doc.getElementsByTagName("Password");
+					Node nod2 = nodos.item(0);
+					// string confirmacion =
+					// algunMetodoQueValidaUsuario(nod1.getTextContent(),nod2.getTextContent());
+					// Por ahora lo validaremos asi para ver si sirve:
+					String username = nod1.getTextContent();
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					if (BinarySearchTree.search(username)) {
+						if (nod2.getTextContent().equals(BinarySearchTree.searchUser(username).getPassword())) {
+							System.out.println("Se concedio el acceso al usuario");
+							System.out.println("Respondiendo al cliente");
+							resp.println("acceso permitido");
+							System.out.println("Mensaje enviado");
+							clienteNuevo.close();
+							System.out.println("Sesion Iniciada");
+						} else {
+							System.out.println("Contraseña incorrecta");
+							System.out.println("Respondiendo al cliente");
+							resp.println("error pass");
+							System.out.println("Mensaje enviado");
+							clienteNuevo.close();
+						}
+					} else {
+						System.out.println("Usuario invalido");
+						System.out.println("Respondiendo al cliente");
+						resp.println("error user");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}
+				} else if (nodo.getTextContent().equals("signIn")) {
+					ServerFunctions.addUser(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("buscar")) {
+					ServerFunctions.buscar(clienteNuevo,doc);
+				} else if (nodo.getTextContent().equals("play")) {
+					ServerFunctions.playsong(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("infoUsuario")) {
+					ServerFunctions.infoUsuario(clienteNuevo,doc);
 				}
-				// }else if(nodo.getTextContent().equals("cargar")) {
-				// NodeList nodos = doc.getElementsByTagName("Orden");
-				// Node nod = nodos.item(0);
-				// if(nod.getTextContent().equals("nombre")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Sad But
-				// True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }else if(nod.getTextContent().equals("artista")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad
-				// But True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }else if(nod.getTextContent().equals("album")) {
-				// System.out.println("Respondiendo al cliente");
-				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-				// resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"
-				// standalone=\"no\"?><MensajeXML><Code>ordenadas</Code><ArrayOfCancion><Cancion><Nombre>Sad
-				// But True</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Enter
-				// Sadman</Nombre><Artista>Metallica</Artista><Album>Black
-				// Album</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>All
-				// Hope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra>
-				// </Letra></Cancion></ArrayOfCancion></MensajeXML>");
-				// System.out.println("Mensaje enviado");
-				// clienteNuevo.close();
-				// }
-				// }
-				// System.out.println("si aparece esto no hay error");
 
 				TransformerFactory transformerFactory = TransformerFactory.newInstance();
 				Transformer transformer = transformerFactory.newTransformer();
@@ -206,8 +243,8 @@ public class Servidor {
 				// System.out.println("Mensaje enviado");
 				// clienteNuevo.close();
 				// servidor.close();
-				// }
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			// } catch (ClassNotFoundException e) {
@@ -225,16 +262,11 @@ public class Servidor {
 		try {
 			System.out.println("Entramos al try");
 			br = new BufferedReader(new InputStreamReader(is));
-			int ind = 0;
-			int cond = 3;
 			line = br.readLine();
 			sb.append(line);
 			while (line.equals("  </Datos>") != true) {
 				line = br.readLine();
-				// System.out.println(line);
 				sb.append(line);
-				ind++;
-				// System.out.println(ind);
 			}
 			System.out.println("Salimos bien del while");
 
