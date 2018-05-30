@@ -64,6 +64,7 @@ import com.sun.javafx.fxml.expression.BinaryExpression;
 
 import Sort.ListaEnlazada;
 import Sort.Song;
+import Trees.AVLTree;
 import Trees.BinarySearchTree;
 import javafx.scene.text.TextAlignment;
 import usuario.User;
@@ -75,9 +76,11 @@ import usuario.User;
 public class Servidor {
 	protected static ArrayList<Song> songs = new ArrayList<>();
 	protected static ArrayList<User> users = new ArrayList<>();
+	
 	public static ListaEnlazada canciones = new ListaEnlazada();
 	protected static BinarySearchTree usertree = new BinarySearchTree();
-
+	protected static AVLTree avltree = new AVLTree();
+	
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
 
@@ -85,11 +88,12 @@ public class Servidor {
 			File songfile = new File("Songs.json");
 			songs = mapper.readValue(songfile, new TypeReference<ArrayList<Song>>() {
 			});
-			for(int i = 0; i < songs.size(); i++) {
+			for (int i = 0; i < songs.size(); i++) {
 				canciones.add(songs.get(i));
+				avltree.add(songs.get(i).getArtist(), i);
 			}
 			System.out.println("Se cargaron las canciones");
-		}catch(IOException e) {
+		} catch (IOException e) {
 			System.out.println("No hay Jsons de Canciones");
 		}
 		try {
@@ -97,10 +101,10 @@ public class Servidor {
 			users = mapper.readValue(userfile, new TypeReference<ArrayList<User>>() {
 			});
 			System.out.println("Se cargaron los usuarios");
-			for(int i=0; i < users.size();i++) {
+			for (int i = 0; i < users.size(); i++) {
 				usertree.add(users.get(i));
 			}
-		}catch(IOException e) {
+		} catch (IOException e) {
 			System.out.println("No hay jsons de usuarios");
 		}
 	}
@@ -111,17 +115,17 @@ public class Servidor {
 	 * @throws TagException
 	 * @throws IOException
 	 */
-//	public static void sendXml() throws Exception {
-//		ServerFunctions.writeXmlFile();
-//	}
+	// public static void sendXml() throws Exception {
+	// ServerFunctions.writeXmlFile();
+	// }
 
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
-		//ServerFunctions.generateUsers();
+		// ServerFunctions.generateUsers();
 		loadJson();
 
-//		for (int i = 0; i < users.size(); i++)
-//			System.out.println(users.get(i).getUsuario());
+		// for (int i = 0; i < users.size(); i++)
+		// System.out.println(users.get(i).getUsuario());
 		try {
 			System.out.println("entramos al try");
 			ServerSocket servidor = new ServerSocket(8000);
@@ -153,16 +157,33 @@ public class Servidor {
 				} else if (nodo.getTextContent().equals("cargar")) {
 					ServerFunctions.sortSongs(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("eliminar")) {
-					NodeList nodos = doc.getElementsByTagName("Cancion");
+					NodeList nodos = doc.getElementsByTagName("Nombre");
 					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 					if (nodos.getLength() > 0) {
 						System.out.println("Se eliminaran las siguientes canciones:");
+						avltree.clear();
+						Servidor.songs.clear();
 						for (int i = 0; i < nodos.getLength(); i++) {
+							
 							System.out.println(nodos.item(i).getTextContent());
 							// Aqui debe ir el metodo para eliminar las canciones que vienen en la NodeList
 							// y tiene que
 							// eliminarlas de la SongList y borrar el archivo .mp3
+							File archivo = new File("C:\\xml\\" + nodos.item(i).getTextContent() + ".mp3");
+							archivo.delete();
+							
+							Servidor.canciones.delete(nodos.item(i).getTextContent());
+
 						}
+						for(int j =0;j<canciones.getLarge();j++) {
+							Servidor.songs.add(canciones.getNodo(j).getSong());
+							avltree.add(canciones.getNodo(j).getSong().getArtist(), j);
+						}
+						File file = new File("Songs.json");
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writeValue(file, Servidor.songs);
+						
+						
 						System.out.println("Respondiendo al cliente");
 						resp.println("Las canciones se eliminaron correctamente");
 						System.out.println("Mensaje enviado");
@@ -209,27 +230,27 @@ public class Servidor {
 				} else if (nodo.getTextContent().equals("signIn")) {
 					ServerFunctions.addUser(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("buscar")) {
-					ServerFunctions.buscar(clienteNuevo,doc);
+					ServerFunctions.buscar(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("play")) {
 					ServerFunctions.playsong(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("infoUsuario")) {
-					ServerFunctions.infoUsuario(clienteNuevo,doc);
+					ServerFunctions.infoUsuario(clienteNuevo, doc);
 				}
 
-//				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//				Transformer transformer = transformerFactory.newTransformer();
-//				// for pretty print
-//				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-//				DOMSource source = new DOMSource(doc);
-//				System.out.println();
-//				// write to console or file
-//				// StreamResult console = new StreamResult(System.out);
-//				StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
-//
-//				// write data
-//				// transformer.transform(source, console);
-//				transformer.transform(source, file);
-//				System.out.println("DONE");
+				// TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				// Transformer transformer = transformerFactory.newTransformer();
+				// // for pretty print
+				// transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				// DOMSource source = new DOMSource(doc);
+				// System.out.println();
+				// // write to console or file
+				// // StreamResult console = new StreamResult(System.out);
+				// StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
+				//
+				// // write data
+				// // transformer.transform(source, console);
+				// transformer.transform(source, file);
+				// System.out.println("DONE");
 
 				// System.out.println("Respondiendo al cliente");
 				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());

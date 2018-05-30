@@ -3,6 +3,8 @@
  */
 package usuario;
 
+import java.util.ArrayList;
+
 /**
  * @author Luis Carlos Mora Fonseca
  * Esta clase contiene la informacion de los usuarios registrados
@@ -14,6 +16,7 @@ public class User {
 	private String edad;
 	private String password;
 	private String md5;
+	private ArrayList<User> amigos;
 	
 	
 	

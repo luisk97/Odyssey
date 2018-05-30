@@ -45,6 +45,7 @@ import Sort.ListaEnlazada;
 import Sort.QuickSort;
 import Sort.RadixSort;
 import Sort.Song;
+import Trees.AVLTree;
 import Trees.BinarySearchTree;
 import jdk.internal.dynalink.linker.LinkerServices.Implementation;
 import usuario.User;
@@ -144,6 +145,11 @@ public class ServerFunctions {
 		}
 		songs.get(0).setPath(path);
 		Servidor.canciones.add(songs.get(0));
+		Servidor.avltree.clear();
+		for(int i =0;i <songs.size();i++) {
+			Servidor.avltree.add(Servidor.canciones.getNodo(i).getSong().getArtist(), i);
+		}
+		
 
 		File file = new File(filename+".json");
 		ObjectMapper mapper = new ObjectMapper();
@@ -152,71 +158,6 @@ public class ServerFunctions {
 		//System.out.println("Vieja cancion:"+songs.get(1).getTitle());
 		System.out.println("Nueva cancion:"+songs.get(0).getTitle());
 	}
-
-//	public static void writeXmlFile() {
-//
-//		ListaEnlazada songs = Servidor.canciones;
-//
-//		
-//		try {
-//			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-//			DocumentBuilder builder;
-//			builder = factory.newDocumentBuilder();
-//			Document doc = builder.newDocument();
-//
-//	        Element root = doc.createElement("MensajeXML");
-//	        doc.appendChild(root);
-//	
-//	        Element datos = doc.createElement("Datos");
-//	        root.appendChild(datos);
-//	
-//	        Element codigo = doc.createElement("Code");
-//	        codigo.appendChild(doc.createTextNode("ordenadas"));
-//	        datos.appendChild(codigo);
-//	
-//	        Song temp;
-//	        for (int i = 0; i < songs.getLarge(); i++) {
-//	        	temp = songs.getNodo(i).getSong();
-//	            Element song = doc.createElement("Cancion");
-//	            datos.appendChild(song);
-//	
-//	            Element nom = doc.createElement("Nombre");
-//	            nom.appendChild(doc.createTextNode(temp.getTitle()+""));
-//	            song.appendChild(nom);
-//	
-//	            Element art = doc.createElement("Artista");
-//	            art.appendChild(doc.createTextNode(temp.getArtist()+""));
-//	            song.appendChild(art);
-//	
-//	            Element album = doc.createElement("Album");
-//	            album.appendChild(doc.createTextNode(temp.getAlbum()+""));
-//	            song.appendChild(album);
-//	
-//	            Element gen = doc.createElement("Genero");
-//	            gen.appendChild(doc.createTextNode(temp.getGenere()+""));
-//	            song.appendChild(gen);
-//	
-//	            datos.appendChild(song);
-//	        }
-//	        
-//	        //Esto es para guardar el xml como archivo en disco pero no hace falta despues cuando
-//	        //no se ocupe ver como queda el xml se puede quitar
-//	        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//			Transformer transformer = transformerFactory.newTransformer();
-//			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-//			DOMSource source = new DOMSource(doc);
-//			StreamResult file = new StreamResult(new File("C:\\xml\\canciones.xml"));
-//			transformer.transform(source, file);
-//			
-//			
-//			
-//		}catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//
-//	}
-//	
-	
 	
 	public static void sortSongs(Socket s,Document d) throws IOException {
 		Socket clienteNuevo = s;
@@ -230,10 +171,13 @@ public class ServerFunctions {
 		if(nod.getTextContent().equals("nombre")) {
 			System.out.println("Ordenando lista de canciones por nombre");
 			
-			ListaEnlazada songs = Servidor.canciones;
-			
+			ListaEnlazada songs = new ListaEnlazada();
+			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+				songs.add(Servidor.canciones.getNodo(i).getSong());
+			}
 			QuickSort Q = new QuickSort();
 			Q.quicksort(songs);
+
 			
 			MensajeXml msj = new MensajeXml();
 			stringXml = msj.xmlListaCanciones(songs);
@@ -244,7 +188,10 @@ public class ServerFunctions {
 		 }else if(nod.getTextContent().equals("artista")) {
 				System.out.println("Ordenando lista de canciones por artista");
 				
-				ListaEnlazada songs = Servidor.canciones;
+				ListaEnlazada songs = new ListaEnlazada();
+				for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+					songs.add(Servidor.canciones.getNodo(i).getSong());
+				}
 				
 				RadixSort R = new RadixSort();
 				R.radix(songs);
@@ -258,7 +205,10 @@ public class ServerFunctions {
 		 }else if(nod.getTextContent().equals("album")) {
 			System.out.println("Ordenando lista de canciones por album");
 				
-			ListaEnlazada songs = Servidor.canciones;
+			ListaEnlazada songs = new ListaEnlazada();
+			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+				songs.add(Servidor.canciones.getNodo(i).getSong());
+			}
 			
 			BubbleSort B = new BubbleSort();
 			B.bubbleSort(songs);
@@ -344,6 +294,8 @@ public class ServerFunctions {
 		clienteNuevo.close();
 	}
 	public static void buscar(Socket clienteNuevo, Document doc) throws IOException {
+		String stringXml = "No Encontrado";
+		
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 		NodeList nodos = doc.getElementsByTagName("Por");
 		Node nod1 = nodos.item(0);
@@ -372,13 +324,29 @@ public class ServerFunctions {
 			nod1 = nodos.item(0);
 			System.out.println("Buscando canciones del artista " + nod1.getTextContent());
 			// Lo mismo que en el anterior pero con el arbol AVL
+			ListaEnlazada song = new ListaEnlazada();
+			ArrayList<Integer> artistaind = Servidor.avltree.search(nod1.getTextContent());
+			if(artistaind.isEmpty()) {
+				resp.println("No encontrado");
+				clienteNuevo.close();
+
+			}else {
+				for(int i = 0;i<artistaind.size();i++) {
+					song.add(Servidor.canciones.getNodo(artistaind.get(i)).getSong());
+				}
+				MensajeXml msj = new MensajeXml();
+				stringXml = msj.xmlListaCanciones(song);
+				resp.println(stringXml);
+				System.out.println("Mensaje enviado");
+				clienteNuevo.close();
+			}
 
 			// Y si no encuentra canciones de ese artista devuelve esto:
-			System.out.println("No se encontraron canciones de ese artista");
-			System.out.println("Respondiendo al cliente");
-			resp.println("No encontrado");
-			System.out.println("Mensaje enviado");
-			clienteNuevo.close();
+//			System.out.println("No se encontraron canciones de ese artista");
+//			System.out.println("Respondiendo al cliente");
+//			resp.println("No encontrado");
+//			System.out.println("Mensaje enviado");
+//			clienteNuevo.close();
 		} else if (nod1.getTextContent().equals("album")) {
 			nodos = doc.getElementsByTagName("Album");
 			nod1 = nodos.item(0);
