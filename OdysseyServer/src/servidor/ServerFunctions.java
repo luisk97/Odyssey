@@ -43,8 +43,12 @@ import com.sun.xml.internal.txw2.annotation.XmlElement;
 import Sort.BubbleSort;
 import Sort.ListaEnlazada;
 import Sort.QuickSort;
+import Sort.RadixSort;
 import Sort.Song;
+import Trees.AVLTree;
+import Trees.BinarySearchTree;
 import jdk.internal.dynalink.linker.LinkerServices.Implementation;
+import usuario.User;
 
 /**
  * @author Daniel Acuña Mora
@@ -101,7 +105,7 @@ public class ServerFunctions {
 
 			clienteNuevo.close();
 
-			createJson(nodos, doc,"casa");
+			createJson(nodos, doc,path,"songs");
 			System.out.println("Canciones en arrayList:");
 			for (int i = 0; i < songs.size(); i++) {
 				System.out.println(songs.get(i).getTitle());
@@ -115,6 +119,7 @@ public class ServerFunctions {
 		}
 		
 	}
+
 	
 
 	/**
@@ -123,7 +128,7 @@ public class ServerFunctions {
 	 * @throws JsonGenerationException
 	 * 
 	 */
-	public static void createJson(NodeList n, Document d,String p)
+	public static void createJson(NodeList n, Document d,String p,String filename)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		String path = p;
 		NodeList nodos = n;
@@ -140,90 +145,19 @@ public class ServerFunctions {
 		}
 		songs.get(0).setPath(path);
 		Servidor.canciones.add(songs.get(0));
+		Servidor.avltree.clear();
+		for(int i =0;i <songs.size();i++) {
+			Servidor.avltree.add(Servidor.canciones.getNodo(i).getSong().getArtist(), i);
+		}
+		
 
-		File file = new File("canciones.json");
+		File file = new File(filename+".json");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(file, songs);
 		// TODO Auto-generated method stub
 		//System.out.println("Vieja cancion:"+songs.get(1).getTitle());
 		System.out.println("Nueva cancion:"+songs.get(0).getTitle());
-
 	}
-	public static void writeXmlFile() {
-		//aqui cambiar este ArrayList por una SongList si se desea
-//		ArrayList<Song> songs = Servidor.songs;
-		ListaEnlazada songs = Servidor.canciones;
-//		XmlMapper xmlmapper = new XmlMapper();
-//		String xml1 = null;
-//		File xml = new File("canciones.xml");
-//		try {
-//		    xml1 = xmlmapper.writeValueAsString(songs);		
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		;
-//		System.out.println(xml1);
-		
-		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder;
-			builder = factory.newDocumentBuilder();
-			Document doc = builder.newDocument();
-
-	        Element root = doc.createElement("MensajeXML");
-	        doc.appendChild(root);
-	
-	        Element datos = doc.createElement("Datos");
-	        root.appendChild(datos);
-	
-	        Element codigo = doc.createElement("Code");
-	        codigo.appendChild(doc.createTextNode("ordenadas"));
-	        datos.appendChild(codigo);
-	
-	        Song temp;
-	        for (int i = 0; i < songs.getLarge(); i++) {
-	        	temp = songs.getNodo(i).getSong();
-	            Element song = doc.createElement("Cancion");
-	            datos.appendChild(song);
-	
-	            Element nom = doc.createElement("Nombre");
-	            nom.appendChild(doc.createTextNode(temp.getTitle()+""));
-	            song.appendChild(nom);
-	
-	            Element art = doc.createElement("Artista");
-	            art.appendChild(doc.createTextNode(temp.getArtist()+""));
-	            song.appendChild(art);
-	
-	            Element album = doc.createElement("Album");
-	            album.appendChild(doc.createTextNode(temp.getAlbum()+""));
-	            song.appendChild(album);
-	
-	            Element gen = doc.createElement("Genero");
-	            gen.appendChild(doc.createTextNode(temp.getGenere()+""));
-	            song.appendChild(gen);
-	
-	            datos.appendChild(song);
-	        }
-	        
-	        //Esto es para guardar el xml como archivo en disco pero no hace falta despues cuando
-	        //no se ocupe ver como queda el xml se puede quitar
-	        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			DOMSource source = new DOMSource(doc);
-			StreamResult file = new StreamResult(new File("C:\\xml\\canciones.xml"));
-			transformer.transform(source, file);
-			
-			
-			
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-	
-	
 	
 	public static void sortSongs(Socket s,Document d) throws IOException {
 		Socket clienteNuevo = s;
@@ -237,10 +171,13 @@ public class ServerFunctions {
 		if(nod.getTextContent().equals("nombre")) {
 			System.out.println("Ordenando lista de canciones por nombre");
 			
-			ListaEnlazada songs = Servidor.canciones;
-			
+			ListaEnlazada songs = new ListaEnlazada();
+			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+				songs.add(Servidor.canciones.getNodo(i).getSong());
+			}
 			QuickSort Q = new QuickSort();
 			Q.quicksort(songs);
+
 			
 			MensajeXml msj = new MensajeXml();
 			stringXml = msj.xmlListaCanciones(songs);
@@ -249,15 +186,29 @@ public class ServerFunctions {
 			System.out.println("Mensaje enviado");
 			clienteNuevo.close();
 		 }else if(nod.getTextContent().equals("artista")) {
-			
-			System.out.println("Respondiendo al cliente");
-			resp.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?><MensajeXML><Code>ordenadas</Code><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Sad But True</Nombre><Artista>Metallica</Artista><Album>BlackAlbum</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Psychosocial</Nombre><Artista>Slipknot</Artista><Album>AllHope Is Gone [Special Edition] Disc 1</Album><Genero>(9)</Genero><Letra></Letra></Cancion><Cancion><Nombre>Enter Sadman</Nombre><Artista>Metallica</Artista><Album>Black Album</Album><Genero>(9)</Genero><Letra></Letra></Cancion></MensajeXML>");
-			System.out.println("Mensaje enviado");
-			clienteNuevo.close();
+				System.out.println("Ordenando lista de canciones por artista");
+				
+				ListaEnlazada songs = new ListaEnlazada();
+				for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+					songs.add(Servidor.canciones.getNodo(i).getSong());
+				}
+				
+				RadixSort R = new RadixSort();
+				R.radix(songs);
+				
+				MensajeXml msj = new MensajeXml();
+				stringXml = msj.xmlListaCanciones(songs);
+				 
+				resp.println(stringXml);
+				System.out.println("Mensaje enviado");
+				clienteNuevo.close();
 		 }else if(nod.getTextContent().equals("album")) {
 			System.out.println("Ordenando lista de canciones por album");
 				
-			ListaEnlazada songs = Servidor.canciones;
+			ListaEnlazada songs = new ListaEnlazada();
+			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+				songs.add(Servidor.canciones.getNodo(i).getSong());
+			}
 			
 			BubbleSort B = new BubbleSort();
 			B.bubbleSort(songs);
@@ -270,4 +221,167 @@ public class ServerFunctions {
 			clienteNuevo.close();
 		 }
 	}
+	public static void addUser(Socket s, Document d) throws IOException {
+		Document doc = d;
+		Socket clienteNuevo = s;
+		ArrayList<User> users = Servidor.users;
+
+		System.out.println("Se esta registrando un usuario");
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("User");
+		Node nod1 = nodos.item(0);
+		//string confirmacion = algunMetodoQueValidaSiYaExisteElUsuario(nod1.getTextContent(),nod2.getTextContent());
+		//Por ahora lo validaremos asi para ver si sirve:
+		if(!Trees.BinarySearchTree.search(nod1.getTextContent())) {
+			nodos = doc.getElementsByTagName("FullName");
+			Node nod2 = nodos.item(0);
+			nodos = doc.getElementsByTagName("Age");
+			Node nod3 = nodos.item(0);
+			nodos = doc.getElementsByTagName("Password");
+			Node nod4 = nodos.item(0);
+			users.add(new User(nod1.getTextContent(),nod2.getTextContent(),nod3.getTextContent(),nod4.getTextContent()));
+			BinarySearchTree.add(new User(nod1.getTextContent(),nod2.getTextContent(),nod3.getTextContent(),nod4.getTextContent()));
+			System.out.println("El usuario se registro con exito!");
+			System.out.println("Respondiendo al cliente");
+			resp.println("exito");
+			System.out.println("Mensaje enviado");
+			
+			File file = new File("Users.json");
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.writeValue(file, users);
+			clienteNuevo.close();
+		}else{
+			System.out.println("El usuario que se desea registrar ya existe!");
+			System.out.println("Respondiendo al cliente");
+			resp.println("usuario existente");
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
+		}
+	}
+//	public static void generateUsers() throws JsonGenerationException, JsonMappingException, IOException {
+//		songs.add(0, new Song());
+//		ArrayList<User> users = Servidor.users;
+//		//songs.add(new Song());
+//		String[] tags = new String[] { "Daniel", "Greivin", "Luisk", "Elba leado" };
+//
+//		for (int i = 0; i < tags.length; i++) {
+//			users.add(new User());	
+//			users.get(i).setUsuario(tags[i]);
+//		}
+//		File file = new File("Users.json");
+//		ObjectMapper mapper = new ObjectMapper();
+//		mapper.writeValue(file, users);
+//		
+//	}
+	public static void playsong(Socket clienteNuevo, Document doc) throws IOException {
+		System.out.println("Se solicito reproducir una cancion");
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("Nombre");
+		Node nod = nodos.item(0);
+		String nombre = nod.getTextContent();
+		System.out.println("Se solicito reproducir la cancion: " + nombre);
+		File file = new File("C:\\xml\\" + nombre + ".mp3");
+		byte[] fileBytes = new byte[(int) file.length()];
+		FileInputStream fis = new FileInputStream(file);
+		fis.read(fileBytes);
+		fis.close();
+		String encodedString = Base64.getEncoder().encodeToString(fileBytes);
+		// toda la construccion de xml ahora se hace en la clase MensajeXml
+		MensajeXml msj = new MensajeXml();
+		String stringXml = msj.xmlPlay(encodedString);
+		resp.println(stringXml);
+		System.out.println("Mensaje enviado");
+		clienteNuevo.close();
+	}
+	public static void buscar(Socket clienteNuevo, Document doc) throws IOException {
+		String stringXml = "No Encontrado";
+		
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("Por");
+		Node nod1 = nodos.item(0);
+		if (nod1.getTextContent().equals("nombre")) {
+			nodos = doc.getElementsByTagName("Nombre");
+			nod1 = nodos.item(0);
+			System.out.println("Buscando las canciones llamadas " + nod1.getTextContent());
+			// Aqui debe ir un metodo que busque el nombre dentro del arbolB como talvez
+			// search(nod1.getTextContent());
+			// y que es metodo nos debuelva la lista de canciones con ese nombre ejemplo
+			// SongList lista = arbolB.search(nod1.getTextContent());
+			// y convertirla a xml con el metodo de ServerFunctions writeXmlFile() o hacer
+			// un metodo parecido que reciba la SongList y devuelva
+			// el xml convertido a String como por ejemplo string msjEnviar =
+			// ServerFunctions.writeXmlFile(lista); y devolver eso al cliente
+
+			// Y si no encuentra canciones con ese nombre, osea if(lista.size > 0 == false)
+			// devuelve esto:
+			System.out.println("No se encontraron canciones con ese nombre");
+			System.out.println("Respondiendo al cliente");
+			resp.println("No encontrado");
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
+		} else if (nod1.getTextContent().equals("artista")) {
+			nodos = doc.getElementsByTagName("Artista");
+			nod1 = nodos.item(0);
+			System.out.println("Buscando canciones del artista " + nod1.getTextContent());
+			// Lo mismo que en el anterior pero con el arbol AVL
+			ListaEnlazada song = new ListaEnlazada();
+			ArrayList<Integer> artistaind = Servidor.avltree.search(nod1.getTextContent());
+			if(artistaind.isEmpty()) {
+				resp.println("No encontrado");
+				clienteNuevo.close();
+
+			}else {
+				for(int i = 0;i<artistaind.size();i++) {
+					song.add(Servidor.canciones.getNodo(artistaind.get(i)).getSong());
+				}
+				MensajeXml msj = new MensajeXml();
+				stringXml = msj.xmlListaCanciones(song);
+				resp.println(stringXml);
+				System.out.println("Mensaje enviado");
+				clienteNuevo.close();
+			}
+
+			// Y si no encuentra canciones de ese artista devuelve esto:
+//			System.out.println("No se encontraron canciones de ese artista");
+//			System.out.println("Respondiendo al cliente");
+//			resp.println("No encontrado");
+//			System.out.println("Mensaje enviado");
+//			clienteNuevo.close();
+		} else if (nod1.getTextContent().equals("album")) {
+			nodos = doc.getElementsByTagName("Album");
+			nod1 = nodos.item(0);
+			System.out.println("Buscando canciones del album " + nod1.getTextContent());
+			// Lo mismo que en el anterior pero con el arbol Splay
+
+			// Y si no encuentra canciones de ese album devuelve esto:
+			System.out.println("No se encontraron canciones de ese album");
+			System.out.println("Respondiendo al cliente");
+			resp.println("No encontrado");
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
+		}
+	}
+	protected static void infoUsuario(Socket clienteNuevo, Document doc) throws IOException {
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("Usuario");
+		Node nod = nodos.item(0);
+		String usuario = nod.getTextContent();
+		// aqui debe ir un metodo que busque en la lista de usuarios a ese usuario
+		// y nos debuelva la intancia de la clase User que debe estar contenida en los
+		// nodos
+		// de la lista de usuarios que se debe implementar, luego mediante un metodo de
+		// la
+		// clase MensajeXml que reciba la clase User se crea un XML con la informacion
+		// del
+		// usuario y retorne un string de ese XML y este se envie por el socket.
+
+		// Por ahora hagamoslo asi para probar
+		User user = BinarySearchTree.searchUser(usuario);
+		MensajeXml msj = new MensajeXml();
+		String stringXml = msj.xmlInfoUser(user);
+		resp.println(stringXml);
+		System.out.println("Mensaje enviado");
+		clienteNuevo.close();
+	}
+
 }
