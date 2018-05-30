@@ -60,9 +60,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.sun.javafx.fxml.expression.BinaryExpression;
 
 import Sort.ListaEnlazada;
 import Sort.Song;
+import Trees.AVLTree;
+import Trees.BinarySearchTree;
 import javafx.scene.text.TextAlignment;
 import usuario.User;
 
@@ -72,45 +75,57 @@ import usuario.User;
  */
 public class Servidor {
 	protected static ArrayList<Song> songs = new ArrayList<>();
+	protected static ArrayList<User> users = new ArrayList<>();
+	
 	public static ListaEnlazada canciones = new ListaEnlazada();
-
+	protected static BinarySearchTree usertree = new BinarySearchTree();
+	protected static AVLTree avltree = new AVLTree();
+	
 	public static void loadJson() throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+
 		try {
-			File file = new File("canciones.json");
-			ObjectMapper mapper = new ObjectMapper();
-			songs = mapper.readValue(file, new TypeReference<ArrayList<Song>>() {
+			File songfile = new File("Songs.json");
+			songs = mapper.readValue(songfile, new TypeReference<ArrayList<Song>>() {
 			});
-			for(int i = 0; i < songs.size(); i++) {
+			for (int i = 0; i < songs.size(); i++) {
 				canciones.add(songs.get(i));
+				avltree.add(songs.get(i).getArtist(), i);
 			}
-		}catch(IOException e) {
-			System.out.println("No hay Jsons");
+			System.out.println("Se cargaron las canciones");
+		} catch (IOException e) {
+			System.out.println("No hay Jsons de Canciones");
+		}
+		try {
+			File userfile = new File("Users.json");
+			users = mapper.readValue(userfile, new TypeReference<ArrayList<User>>() {
+			});
+			System.out.println("Se cargaron los usuarios");
+			for (int i = 0; i < users.size(); i++) {
+				usertree.add(users.get(i));
+			}
+		} catch (IOException e) {
+			System.out.println("No hay jsons de usuarios");
 		}
 	}
 
 	/**
 	 * @param args
-	 * @throws Exception 
+	 * @throws Exception
 	 * @throws TagException
 	 * @throws IOException
 	 */
-	public static void sendXml() throws Exception {
-		ServerFunctions.writeXmlFile();
-	}
+	// public static void sendXml() throws Exception {
+	// ServerFunctions.writeXmlFile();
+	// }
+
 	public static void main(String[] args) throws IOException, TagException {
 		// File sourceFile;
+		// ServerFunctions.generateUsers();
 		loadJson();
-		try {
-			sendXml();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		
-		for (int i = 0; i < songs.size(); i++)
-			System.out.println(songs.get(i).getTitle());
-		// setMeta();
+
+		// for (int i = 0; i < users.size(); i++)
+		// System.out.println(users.get(i).getUsuario());
 		try {
 			System.out.println("entramos al try");
 			ServerSocket servidor = new ServerSocket(8000);
@@ -139,216 +154,103 @@ public class Servidor {
 				Node nodo = listaNodos.item(0);
 				if (nodo.getTextContent().equals("add")) {
 					ServerFunctions.addSong(doc, clienteNuevo, lel);
-				}else if(nodo.getTextContent().equals("cargar")) {
+				} else if (nodo.getTextContent().equals("cargar")) {
 					ServerFunctions.sortSongs(clienteNuevo, doc);
-				}else if(nodo.getTextContent().equals("eliminar")) {
-					 NodeList nodos = doc.getElementsByTagName("Cancion");
-					 PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					 if(nodos.getLength()>0) {
-						 System.out.println("Se eliminaran las siguientes canciones:");
-						 for(int i = 0; i < nodos.getLength();i++) {
-							 System.out.println(nodos.item(i).getTextContent());
-							 //Aqui debe ir el metodo para eliminar las canciones que vienen en la NodeList y tiene que
-							 //eliminarlas de la SongList y borrar el archivo .mp3
-						 }
-						 System.out.println("Respondiendo al cliente");
-						 resp.println("Las canciones se eliminaron correctamente");
-						 System.out.println("Mensaje enviado");
-						 clienteNuevo.close();
-					 }else {
-						 System.out.println("Respondiendo al cliente");
-						 resp.println("No se eligio ninguna cancion para eliminar");
-						 System.out.println("Mensaje enviado");
-						 clienteNuevo.close();
-					 }
-				}else if(nodo.getTextContent().equals("logIn"))	{
+				} else if (nodo.getTextContent().equals("eliminar")) {
+					NodeList nodos = doc.getElementsByTagName("Nombre");
+					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+					if (nodos.getLength() > 0) {
+						System.out.println("Se eliminaran las siguientes canciones:");
+						avltree.clear();
+						Servidor.songs.clear();
+						for (int i = 0; i < nodos.getLength(); i++) {
+							
+							System.out.println(nodos.item(i).getTextContent());
+							// Aqui debe ir el metodo para eliminar las canciones que vienen en la NodeList
+							// y tiene que
+							// eliminarlas de la SongList y borrar el archivo .mp3
+							File archivo = new File("C:\\xml\\" + nodos.item(i).getTextContent() + ".mp3");
+							archivo.delete();
+							
+							Servidor.canciones.delete(nodos.item(i).getTextContent());
+
+						}
+						for(int j =0;j<canciones.getLarge();j++) {
+							Servidor.songs.add(canciones.getNodo(j).getSong());
+							avltree.add(canciones.getNodo(j).getSong().getArtist(), j);
+						}
+						File file = new File("Songs.json");
+						ObjectMapper mapper = new ObjectMapper();
+						mapper.writeValue(file, Servidor.songs);
+						
+						
+						System.out.println("Respondiendo al cliente");
+						resp.println("Las canciones se eliminaron correctamente");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					} else {
+						System.out.println("Respondiendo al cliente");
+						resp.println("No se eligio ninguna cancion para eliminar");
+						System.out.println("Mensaje enviado");
+						clienteNuevo.close();
+					}
+				} else if (nodo.getTextContent().equals("logIn")) {
 					System.out.println("Un usuario esta iniciando sesion");
 					NodeList nodos = doc.getElementsByTagName("User");
 					Node nod1 = nodos.item(0);
 					nodos = doc.getElementsByTagName("Password");
 					Node nod2 = nodos.item(0);
-					//string confirmacion = algunMetodoQueValidaUsuario(nod1.getTextContent(),nod2.getTextContent());
-					//Por ahora lo validaremos asi para ver si sirve:
+					// string confirmacion =
+					// algunMetodoQueValidaUsuario(nod1.getTextContent(),nod2.getTextContent());
+					// Por ahora lo validaremos asi para ver si sirve:
+					String username = nod1.getTextContent();
 					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					if(nod1.getTextContent().equals("luisk")) {
-						if(nod2.getTextContent().equals("pass")) {
+					if (BinarySearchTree.search(username)) {
+						if (nod2.getTextContent().equals(BinarySearchTree.searchUser(username).getPassword())) {
 							System.out.println("Se concedio el acceso al usuario");
 							System.out.println("Respondiendo al cliente");
 							resp.println("acceso permitido");
 							System.out.println("Mensaje enviado");
 							clienteNuevo.close();
 							System.out.println("Sesion Iniciada");
-						}else {
+						} else {
 							System.out.println("Contraseña incorrecta");
 							System.out.println("Respondiendo al cliente");
 							resp.println("error pass");
 							System.out.println("Mensaje enviado");
 							clienteNuevo.close();
 						}
-					}else {
+					} else {
 						System.out.println("Usuario invalido");
 						System.out.println("Respondiendo al cliente");
 						resp.println("error user");
 						System.out.println("Mensaje enviado");
 						clienteNuevo.close();
 					}
-				}else if(nodo.getTextContent().equals("signIn")) {
-					System.out.println("Se esta rejistrando un usuario");
-					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					NodeList nodos = doc.getElementsByTagName("User");
-					Node nod1 = nodos.item(0);
-					//string confirmacion = algunMetodoQueValidaSiYaExisteElUsuario(nod1.getTextContent(),nod2.getTextContent());
-					
-					//Por ahora lo validaremos asi para ver si sirve:
-					if(!nod1.getTextContent().equals("LuisK")) {
-						nodos = doc.getElementsByTagName("FullName");
-						Node nod2 = nodos.item(0);
-						nodos = doc.getElementsByTagName("Age");
-						Node nod3 = nodos.item(0);
-						nodos = doc.getElementsByTagName("Password");
-						Node nod4 = nodos.item(0);
-						System.out.println("El usuario se registro con exito!");
-						System.out.println("Respondiendo al cliente");
-						resp.println("exito");
-						System.out.println("Mensaje enviado");
-						clienteNuevo.close();
-					}else{
-						System.out.println("El usuario que se desea registrar ya existe!");
-						System.out.println("Respondiendo al cliente");
-						resp.println("usuario existente");
-						System.out.println("Mensaje enviado");
-						clienteNuevo.close();
-					}
-				}else if(nodo.getTextContent().equals("buscar")) {
-					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					NodeList nodos = doc.getElementsByTagName("Por");
-					Node nod1 = nodos.item(0);
-					if(nod1.getTextContent().equals("nombre")) {
-						nodos = doc.getElementsByTagName("Nombre");
-						nod1 = nodos.item(0);
-						System.out.println("Buscando las canciones llamadas "+nod1.getTextContent());
-						//Aqui debe ir un metodo que busque el nombre dentro del arbolB como talvez search(nod1.getTextContent());
-						//y que es metodo nos debuelva la lista de canciones con ese nombre ejemplo SongList lista = arbolB.search(nod1.getTextContent());
-						//y convertirla a xml con el metodo de ServerFunctions writeXmlFile() o hacer un metodo parecido que reciba la SongList y devuelva 
-						//el xml convertido a String como por ejemplo string msjEnviar = ServerFunctions.writeXmlFile(lista); y devolver eso al cliente
-						 
-						//Y si no encuentra canciones con ese nombre, osea if(lista.size > 0 == false) devuelve esto:
-						System.out.println("No se encontraron canciones con ese nombre");
-						System.out.println("Respondiendo al cliente");
-						resp.println("No encontrado");
-						System.out.println("Mensaje enviado");
-						clienteNuevo.close();
-					}else if(nod1.getTextContent().equals("artista")) {
-						nodos = doc.getElementsByTagName("Artista");
-						nod1 = nodos.item(0);
-						System.out.println("Buscando canciones del artista "+nod1.getTextContent());
-						//Lo mismo que en el anterior pero con el arbol AVL
-						 
-						//Y si no encuentra canciones de ese artista devuelve esto: 
-						System.out.println("No se encontraron canciones de ese artista");
-						System.out.println("Respondiendo al cliente");
-						resp.println("No encontrado");
-						System.out.println("Mensaje enviado");
-						clienteNuevo.close();
-					}else if(nod1.getTextContent().equals("album")) {
-						nodos = doc.getElementsByTagName("Album");
-						nod1 = nodos.item(0);
-						System.out.println("Buscando canciones del album "+nod1.getTextContent());
-						//Lo mismo que en el anterior pero con el arbol Splay
-						 
-						//Y si no encuentra canciones de ese album devuelve esto:
-						System.out.println("No se encontraron canciones de ese album");
-						System.out.println("Respondiendo al cliente");
-						resp.println("No encontrado");
-						System.out.println("Mensaje enviado");
-						clienteNuevo.close();
-					}
-				}else if(nodo.getTextContent().equals("play")) {
-					System.out.println("Se solicito reproducir una cancion");
-					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					NodeList nodos = doc.getElementsByTagName("Nombre");
-					Node nod = nodos.item(0);
-					String nombre = nod.getTextContent();
-					System.out.println("Se solicito reproducir la cancion "+nombre);
-					File file = new File("C:\\xml\\" +nombre+ ".mp3");
-					byte[] fileBytes = new byte[(int) file.length()];
-					FileInputStream fis = new FileInputStream(file);
-					fis.read(fileBytes);
-					fis.close();
-					String encodedString = Base64.getEncoder().encodeToString(fileBytes);
-					//toda la construccion de xml ahora se hace en la clase MensajeXml
-					MensajeXml msj = new MensajeXml();
-					String stringXml = msj.xmlPlay(encodedString);
-					resp.println(stringXml);
-					System.out.println("Mensaje enviado");
-					clienteNuevo.close();
-				}else if(nodo.getTextContent().equals("infoUsuario")) {
-					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					NodeList nodos = doc.getElementsByTagName("Usuario");
-					Node nod = nodos.item(0);
-					String usuario = nod.getTextContent();
-					//aqui debe ir un metodo que busque en la lista de usuarios a ese usuario
-					//y nos debuelva la intancia de la clase User que debe estar contenida en los nodos
-					//de la lista de usuarios que se debe implementar, luego mediante un metodo de la
-					//clase MensajeXml que reciba la clase User se crea un XML con la informacion del 
-					//usuario y retorne un string de ese XML y este se envie por el socket.
-					
-					
-					//Por ahora hagamoslo asi para probar
-					User user = new User("luisk","Luis Carlos Mora Fonseca", "20", "pass");
-					/*Esta variable msj se puede volver golbal en ServerFunctions*/ 
-					MensajeXml msj = new MensajeXml();
-					String stringXml = msj.xmlInfoUser(user);
-					resp.println(stringXml);
-					System.out.println("Mensaje enviado");
-					clienteNuevo.close();
-				}else if(nodo.getTextContent().equals("editUsuario")) {
-					PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
-					NodeList nodos = doc.getElementsByTagName("UsuarioAnt");
-					Node nod = nodos.item(0);
-					//aqui debe ir un metodo que busque el usuario y remplase la info de ese usuario con 
-					//la nueva informacion que se envio.
-					
-					//Por ahora hagamoslo asi para probar
-					nodos = doc.getElementsByTagName("UsuarioNew");
-					nod = nodos.item(0);
-					String newUser = nod.getTextContent().toString();
-					
-					nodos = doc.getElementsByTagName("Nombre");
-					nod = nodos.item(0);
-					String newName = nod.getTextContent().toString();
-					
-					nodos = doc.getElementsByTagName("Edad");
-					nod = nodos.item(0);
-					String newAge = nod.getTextContent().toString();
-					
-					
-					
-					
-					User user = new User(newUser,newName, newAge, "pass");
-					MensajeXml msj = new MensajeXml();
-					String stringXml = msj.xmlInfoUser(user);
-					resp.println(stringXml);
-					System.out.println("Mensaje enviado");
-					clienteNuevo.close();
-					
-					String usuario = nod.getTextContent();
+				} else if (nodo.getTextContent().equals("signIn")) {
+					ServerFunctions.addUser(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("buscar")) {
+					ServerFunctions.buscar(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("play")) {
+					ServerFunctions.playsong(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("infoUsuario")) {
+					ServerFunctions.infoUsuario(clienteNuevo, doc);
 				}
 
-				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-				Transformer transformer = transformerFactory.newTransformer();
-				// for pretty print
-				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-				DOMSource source = new DOMSource(doc);
-				System.out.println();
-				// write to console or file
-				// StreamResult console = new StreamResult(System.out);
-				StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
-				
-				// write data
-				// transformer.transform(source, console);
-				transformer.transform(source, file);
-				System.out.println("DONE");
+				// TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				// Transformer transformer = transformerFactory.newTransformer();
+				// // for pretty print
+				// transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				// DOMSource source = new DOMSource(doc);
+				// System.out.println();
+				// // write to console or file
+				// // StreamResult console = new StreamResult(System.out);
+				// StreamResult file = new StreamResult(new File("C:\\xml\\archivo.xml"));
+				//
+				// // write data
+				// // transformer.transform(source, console);
+				// transformer.transform(source, file);
+				// System.out.println("DONE");
 
 				// System.out.println("Respondiendo al cliente");
 				// PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
@@ -357,9 +259,12 @@ public class Servidor {
 				// clienteNuevo.close();
 				// servidor.close();
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
+			// } catch (ClassNotFoundException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
 		}
 	}
 
