@@ -47,19 +47,18 @@ public class ListaEnlazada{
 			this.tail = temp.getNext();
 		}
 	}
-	
 	/**
 	 * Metodo para eliminar datos
 	 * @param dato
 	 */
 	public void delete(Song song) {
 		Nodo nodo = this.head;
-		if(nodo.getSong().getTitle().compareTo(song.getTitle()) == 0){
+		if(nodo.getSong().getTitle().compareToIgnoreCase(song.getTitle()) == 0){
 			this.head = nodo.getNext();
 			large --;
 		}else{
 			while(nodo.getNext()!= null){
-				if(nodo.getNext().getSong().getTitle().compareTo(song.getTitle()) == 0){
+				if(nodo.getNext().getSong().getTitle().compareToIgnoreCase(song.getTitle()) == 0){
 					nodo.setNext(nodo.getNext().getNext());
 					large --;
 					if(nodo.getNext() == null){
@@ -72,8 +71,26 @@ public class ListaEnlazada{
 			}
 		}
 	}
-	
-	
+	public void delete(String str) {
+		Nodo nodo = this.head;
+		if(nodo.getSong().getTitle().compareToIgnoreCase(str) == 0){
+			this.head = nodo.getNext();
+			large --;
+		}else{
+			while(nodo.getNext()!= null){
+				if(nodo.getNext().getSong().getTitle().compareToIgnoreCase(str) == 0){
+					nodo.setNext(nodo.getNext().getNext());
+					large --;
+					if(nodo.getNext() == null){
+						this.tail = nodo;
+					}
+					break;
+				}else{
+					nodo = nodo.getNext();
+				}
+			}
+		}
+	}
 	/**
 	 * elimina todos los datos de la lista
 	 */

@@ -12,7 +12,7 @@ public class BubbleSort {
 				Nodo next = list.getHead().getNext();
 				for (int j = 0; j < list.getLarge() - 1; j++) {
 
-					if (current.getSong().getAlbum().compareTo(next.getSong().getAlbum()) > 0) {
+					if (current.getSong().getAlbum().compareToIgnoreCase(next.getSong().getAlbum()) > 0) {
 
 						Song temp = current.getSong();
 						current.setSong(next.getSong());
