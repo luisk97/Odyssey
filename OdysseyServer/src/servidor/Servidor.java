@@ -235,6 +235,8 @@ public class Servidor {
 					ServerFunctions.playsong(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("infoUsuario")) {
 					ServerFunctions.infoUsuario(clienteNuevo, doc);
+				}else if (nodo.getTextContent().equals("editUsuario")) {
+					ServerFunctions.editUsuario(clienteNuevo, doc);
 				}
 
 				// TransformerFactory transformerFactory = TransformerFactory.newInstance();

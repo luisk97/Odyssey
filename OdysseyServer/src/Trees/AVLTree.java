@@ -108,4 +108,7 @@ public class AVLTree {
 			}
 		}
 	}
+	public void clear() {
+		this.root = null;
+	}
 }

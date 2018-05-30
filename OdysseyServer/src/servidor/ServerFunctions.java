@@ -221,6 +221,9 @@ public class ServerFunctions {
 			clienteNuevo.close();
 		 }
 	}
+	
+	
+	
 	public static void addUser(Socket s, Document d) throws IOException {
 		Document doc = d;
 		Socket clienteNuevo = s;
@@ -375,7 +378,6 @@ public class ServerFunctions {
 		// del
 		// usuario y retorne un string de ese XML y este se envie por el socket.
 
-		// Por ahora hagamoslo asi para probar
 		User user = BinarySearchTree.searchUser(usuario);
 		MensajeXml msj = new MensajeXml();
 		String stringXml = msj.xmlInfoUser(user);
@@ -384,4 +386,35 @@ public class ServerFunctions {
 		clienteNuevo.close();
 	}
 
+	
+	protected static void editUsuario(Socket clienteNuevo, Document doc) throws IOException {
+		System.out.println("Se esta editando un perfil");
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("UsuarioAnt");
+		Node nod = nodos.item(0);
+		String usuarioAnt = nod.getTextContent();
+		System.out.println(usuarioAnt);
+		User user = BinarySearchTree.searchUser(usuarioAnt);
+		nodos = doc.getElementsByTagName("UsuarioNew");
+		nod = nodos.item(0);
+		user.setUsuario(nod.getTextContent());
+		nodos = doc.getElementsByTagName("Nombre");
+		nod = nodos.item(0);
+		user.setNombre(nod.getTextContent());
+		nodos = doc.getElementsByTagName("Edad");
+		nod = nodos.item(0);
+		user.setEdad(nod.getTextContent());
+		
+		ArrayList<User> users = Servidor.users;
+		
+		File file = new File("Users.json");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(file, users);
+		
+		MensajeXml msj = new MensajeXml();
+		String stringXml = msj.xmlInfoUser(user);
+		resp.println(stringXml);
+		System.out.println("Mensaje enviado");
+		clienteNuevo.close();
+	}
 }
