@@ -3,10 +3,15 @@
  */
 package servidor;
 
+import java.io.File;
+import java.io.IOError;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -167,8 +172,58 @@ public class MensajeXml {
 			StringWriter sw = new StringWriter();
 			t.transform(new DOMSource(doc2), new StreamResult(sw));
 			stringXml = sw.toString();
+			 // for pretty print
+//			 t.setOutputProperty(OutputKeys.INDENT, "yes");
+//			 DOMSource source = new DOMSource(doc2);
+//			 System.out.println();
+//			 // write to console or file
+//			 // StreamResult console = new StreamResult(System.out);
+//			 StreamResult file = new StreamResult(new File("C:\\xml\\user.xml"));
+//			
+//			 // write data
+//			 // transformer.transform(source, console);
+//			 t.transform(source, file);
+//			 System.out.println("DONE");
 				
 		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return stringXml;
+	}
+	public static String amigos(ArrayList<User> amigos) {
+		
+		String stringXml = "";
+		try {
+			DocumentBuilderFactory factory2 = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder2;
+			builder2 = factory2.newDocumentBuilder();
+			Document doc2 = builder2.newDocument();
+
+		    Element root = doc2.createElement("MensajeXML");
+		    doc2.appendChild(root);
+		
+		    Element datos = doc2.createElement("Datos");
+		    root.appendChild(datos);
+		
+		    Element codigo = doc2.createElement("Code");
+		    codigo.appendChild(doc2.createTextNode("amigos"));
+		    datos.appendChild(codigo);
+		    
+		    for(int i=0;i<amigos.size();i++) {
+		    	 Element usua = doc2.createElement("Amigo");
+				    datos.appendChild(usua);
+				
+				    Element usuario = doc2.createElement("usuario");
+				    usuario.appendChild(doc2.createTextNode(amigos.get(i).getUsuario().toString()));
+				    usua.appendChild(usuario);
+				    
+				    Element nom = doc2.createElement("nombre");
+				    nom.appendChild(doc2.createTextNode(amigos.get(i).getNombre().toString()));
+				    usua.appendChild(nom);
+				    datos.appendChild(usua);
+		    }
+		}
+		catch(Exception e) {
 			e.printStackTrace();
 		}
 		return stringXml;

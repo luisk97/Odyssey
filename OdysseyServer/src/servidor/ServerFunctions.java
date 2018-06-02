@@ -73,13 +73,12 @@ public class ServerFunctions {
 		// filemp3.renameTo(file2);
 	}
 
-	 ArrayList<Integer> add = new ArrayList<>();
-	 private static ArrayList<Song> songs = Servidor.songs;
+	ArrayList<Integer> add = new ArrayList<>();
+	private static ArrayList<Song> songs = Servidor.songs;
 
 	protected static void addSong(Document d, Socket s, String sd) throws IOException {
-		//ArrayList<Song> songs = Servidor.songs;
-		//songs.add(new Song());
-
+		// ArrayList<Song> songs = Servidor.songs;
+		// songs.add(new Song());
 
 		Document doc = d;
 		Socket clienteNuevo = s;
@@ -105,22 +104,20 @@ public class ServerFunctions {
 
 			clienteNuevo.close();
 
-			createJson(nodos, doc,path,"songs");
+			createJson(nodos, doc, path, "songs");
 			System.out.println("Canciones en arrayList:");
 			for (int i = 0; i < songs.size(); i++) {
 				System.out.println(songs.get(i).getTitle());
 			}
-			
+
 			System.out.println("Canciones en ListaEnlazada:");
 			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
 				System.out.println(Servidor.canciones.getNodo(i).getSong().getTitle());
 			}
 
 		}
-		
-	}
 
-	
+	}
 
 	/**
 	 * @throws IOException
@@ -128,14 +125,14 @@ public class ServerFunctions {
 	 * @throws JsonGenerationException
 	 * 
 	 */
-	public static void createJson(NodeList n, Document d,String p,String filename)
+	public static void createJson(NodeList n, Document d, String p, String filename)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		String path = p;
 		NodeList nodos = n;
 		Document doc = d;
 		Node nod = nodos.item(0);
 		songs.add(0, new Song());
-		//songs.add(new Song());
+		// songs.add(new Song());
 		String[] tags = new String[] { "Nombre", "Artista", "Album", "Genero" };
 
 		for (int i = 0; i < tags.length; i++) {
@@ -146,20 +143,19 @@ public class ServerFunctions {
 		songs.get(0).setPath(path);
 		Servidor.canciones.add(songs.get(0));
 		Servidor.avltree.clear();
-		for(int i =0;i <songs.size();i++) {
+		for (int i = 0; i < songs.size(); i++) {
 			Servidor.avltree.add(Servidor.canciones.getNodo(i).getSong().getArtist(), i);
 		}
-		
 
-		File file = new File(filename+".json");
+		File file = new File(filename + ".json");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(file, songs);
 		// TODO Auto-generated method stub
-		//System.out.println("Vieja cancion:"+songs.get(1).getTitle());
-		System.out.println("Nueva cancion:"+songs.get(0).getTitle());
+		// System.out.println("Vieja cancion:"+songs.get(1).getTitle());
+		System.out.println("Nueva cancion:" + songs.get(0).getTitle());
 	}
-	
-	public static void sortSongs(Socket s,Document d) throws IOException {
+
+	public static void sortSongs(Socket s, Document d) throws IOException {
 		Socket clienteNuevo = s;
 		System.out.println("Cargando lista de canciones en el cliente");
 		Document document = d;
@@ -167,10 +163,10 @@ public class ServerFunctions {
 		Node nod = nodos.item(0);
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 		String stringXml = "No hay canciones";
-		//Aqui valida si se desea ordenar por nombre, artista o album
-		if(nod.getTextContent().equals("nombre")) {
+		// Aqui valida si se desea ordenar por nombre, artista o album
+		if (nod.getTextContent().equals("nombre")) {
 			System.out.println("Ordenando lista de canciones por nombre");
-			
+
 			ListaEnlazada songs = new ListaEnlazada();
 			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
 				songs.add(Servidor.canciones.getNodo(i).getSong());
@@ -178,49 +174,49 @@ public class ServerFunctions {
 			QuickSort Q = new QuickSort();
 			Q.quicksort(songs);
 
-			
 			MensajeXml msj = new MensajeXml();
 			stringXml = msj.xmlListaCanciones(songs);
-			 
+
 			resp.println(stringXml);
 			System.out.println("Mensaje enviado");
 			clienteNuevo.close();
-		 }else if(nod.getTextContent().equals("artista")) {
-				System.out.println("Ordenando lista de canciones por artista");
-				
-				ListaEnlazada songs = new ListaEnlazada();
-				for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
-					songs.add(Servidor.canciones.getNodo(i).getSong());
-				}
-				
-				RadixSort R = new RadixSort();
-				R.radix(songs);
-				
-				MensajeXml msj = new MensajeXml();
-				stringXml = msj.xmlListaCanciones(songs);
-				 
-				resp.println(stringXml);
-				System.out.println("Mensaje enviado");
-				clienteNuevo.close();
-		 }else if(nod.getTextContent().equals("album")) {
-			System.out.println("Ordenando lista de canciones por album");
-				
+		} else if (nod.getTextContent().equals("artista")) {
+			System.out.println("Ordenando lista de canciones por artista");
+
 			ListaEnlazada songs = new ListaEnlazada();
 			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
 				songs.add(Servidor.canciones.getNodo(i).getSong());
 			}
-			
-			BubbleSort B = new BubbleSort();
-			B.bubbleSort(songs);
-				
+
+			RadixSort R = new RadixSort();
+			R.radix(songs);
+
 			MensajeXml msj = new MensajeXml();
 			stringXml = msj.xmlListaCanciones(songs);
-				 
+
 			resp.println(stringXml);
 			System.out.println("Mensaje enviado");
 			clienteNuevo.close();
-		 }
+		} else if (nod.getTextContent().equals("album")) {
+			System.out.println("Ordenando lista de canciones por album");
+
+			ListaEnlazada songs = new ListaEnlazada();
+			for (int i = 0; i < Servidor.canciones.getLarge(); i++) {
+				songs.add(Servidor.canciones.getNodo(i).getSong());
+			}
+
+			BubbleSort B = new BubbleSort();
+			B.bubbleSort(songs);
+
+			MensajeXml msj = new MensajeXml();
+			stringXml = msj.xmlListaCanciones(songs);
+
+			resp.println(stringXml);
+			System.out.println("Mensaje enviado");
+			clienteNuevo.close();
+		}
 	}
+
 	public static void addUser(Socket s, Document d) throws IOException {
 		Document doc = d;
 		Socket clienteNuevo = s;
@@ -230,27 +226,30 @@ public class ServerFunctions {
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 		NodeList nodos = doc.getElementsByTagName("User");
 		Node nod1 = nodos.item(0);
-		//string confirmacion = algunMetodoQueValidaSiYaExisteElUsuario(nod1.getTextContent(),nod2.getTextContent());
-		//Por ahora lo validaremos asi para ver si sirve:
-		if(!Trees.BinarySearchTree.search(nod1.getTextContent())) {
+		// string confirmacion =
+		// algunMetodoQueValidaSiYaExisteElUsuario(nod1.getTextContent(),nod2.getTextContent());
+		// Por ahora lo validaremos asi para ver si sirve:
+		if (!Trees.BinarySearchTree.search(nod1.getTextContent())) {
 			nodos = doc.getElementsByTagName("FullName");
 			Node nod2 = nodos.item(0);
 			nodos = doc.getElementsByTagName("Age");
 			Node nod3 = nodos.item(0);
 			nodos = doc.getElementsByTagName("Password");
 			Node nod4 = nodos.item(0);
-			users.add(new User(nod1.getTextContent(),nod2.getTextContent(),nod3.getTextContent(),nod4.getTextContent()));
-			BinarySearchTree.add(new User(nod1.getTextContent(),nod2.getTextContent(),nod3.getTextContent(),nod4.getTextContent()));
+			users.add(new User(nod1.getTextContent(), nod2.getTextContent(), nod3.getTextContent(),
+					nod4.getTextContent()));
+			BinarySearchTree.add(new User(nod1.getTextContent(), nod2.getTextContent(), nod3.getTextContent(),
+					nod4.getTextContent()));
 			System.out.println("El usuario se registro con exito!");
 			System.out.println("Respondiendo al cliente");
 			resp.println("exito");
 			System.out.println("Mensaje enviado");
-			
+
 			File file = new File("Users.json");
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeValue(file, users);
 			clienteNuevo.close();
-		}else{
+		} else {
 			System.out.println("El usuario que se desea registrar ya existe!");
 			System.out.println("Respondiendo al cliente");
 			resp.println("usuario existente");
@@ -258,21 +257,23 @@ public class ServerFunctions {
 			clienteNuevo.close();
 		}
 	}
-//	public static void generateUsers() throws JsonGenerationException, JsonMappingException, IOException {
-//		songs.add(0, new Song());
-//		ArrayList<User> users = Servidor.users;
-//		//songs.add(new Song());
-//		String[] tags = new String[] { "Daniel", "Greivin", "Luisk", "Elba leado" };
-//
-//		for (int i = 0; i < tags.length; i++) {
-//			users.add(new User());	
-//			users.get(i).setUsuario(tags[i]);
-//		}
-//		File file = new File("Users.json");
-//		ObjectMapper mapper = new ObjectMapper();
-//		mapper.writeValue(file, users);
-//		
-//	}
+
+	// public static void generateUsers() throws JsonGenerationException,
+	// JsonMappingException, IOException {
+	// songs.add(0, new Song());
+	// ArrayList<User> users = Servidor.users;
+	// //songs.add(new Song());
+	// String[] tags = new String[] { "Daniel", "Greivin", "Luisk", "Elba leado" };
+	//
+	// for (int i = 0; i < tags.length; i++) {
+	// users.add(new User());
+	// users.get(i).setUsuario(tags[i]);
+	// }
+	// File file = new File("Users.json");
+	// ObjectMapper mapper = new ObjectMapper();
+	// mapper.writeValue(file, users);
+	//
+	// }
 	public static void playsong(Socket clienteNuevo, Document doc) throws IOException {
 		System.out.println("Se solicito reproducir una cancion");
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
@@ -293,9 +294,10 @@ public class ServerFunctions {
 		System.out.println("Mensaje enviado");
 		clienteNuevo.close();
 	}
+
 	public static void buscar(Socket clienteNuevo, Document doc) throws IOException {
 		String stringXml = "No Encontrado";
-		
+
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 		NodeList nodos = doc.getElementsByTagName("Por");
 		Node nod1 = nodos.item(0);
@@ -326,12 +328,12 @@ public class ServerFunctions {
 			// Lo mismo que en el anterior pero con el arbol AVL
 			ListaEnlazada song = new ListaEnlazada();
 			ArrayList<Integer> artistaind = Servidor.avltree.search(nod1.getTextContent());
-			if(artistaind.isEmpty()) {
+			if (artistaind.isEmpty()) {
 				resp.println("No encontrado");
 				clienteNuevo.close();
 
-			}else {
-				for(int i = 0;i<artistaind.size();i++) {
+			} else {
+				for (int i = 0; i < artistaind.size(); i++) {
 					song.add(Servidor.canciones.getNodo(artistaind.get(i)).getSong());
 				}
 				MensajeXml msj = new MensajeXml();
@@ -342,11 +344,11 @@ public class ServerFunctions {
 			}
 
 			// Y si no encuentra canciones de ese artista devuelve esto:
-//			System.out.println("No se encontraron canciones de ese artista");
-//			System.out.println("Respondiendo al cliente");
-//			resp.println("No encontrado");
-//			System.out.println("Mensaje enviado");
-//			clienteNuevo.close();
+			// System.out.println("No se encontraron canciones de ese artista");
+			// System.out.println("Respondiendo al cliente");
+			// resp.println("No encontrado");
+			// System.out.println("Mensaje enviado");
+			// clienteNuevo.close();
 		} else if (nod1.getTextContent().equals("album")) {
 			nodos = doc.getElementsByTagName("Album");
 			nod1 = nodos.item(0);
@@ -361,6 +363,7 @@ public class ServerFunctions {
 			clienteNuevo.close();
 		}
 	}
+
 	protected static void infoUsuario(Socket clienteNuevo, Document doc) throws IOException {
 		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
 		NodeList nodos = doc.getElementsByTagName("Usuario");
@@ -382,6 +385,41 @@ public class ServerFunctions {
 		resp.println(stringXml);
 		System.out.println("Mensaje enviado");
 		clienteNuevo.close();
+	}
+
+	public static void addFriend(Socket clienteNuevo, Document doc) throws IOException {
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+
+		ArrayList<User> users = Servidor.users;
+		NodeList nodos = doc.getElementsByTagName("Usuario");
+		Node nod = nodos.item(0);
+		NodeList nodoamigo = doc.getElementsByTagName("Amigo");
+		Node nodamigo = nodoamigo.item(0);
+		String usuario = nod.getTextContent();
+		String amigo = nodamigo.getTextContent();
+		
+		
+		
+		User user = BinarySearchTree.searchUser(usuario);
+		User friend = BinarySearchTree.searchUser(amigo);
+		if(friend!=null) {
+			user.addAmigo(friend);
+			resp.println("AddUser");
+			File file = new File("Users.json");
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.writeValue(file, users);
+			clienteNuevo.close();
+		}
+		else {
+			resp.println("ErrorUsuario");
+			clienteNuevo.close();
+		}
+		
+		
+		
+		
+		
+
 	}
 
 }

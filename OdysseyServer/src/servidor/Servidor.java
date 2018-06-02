@@ -60,6 +60,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.sun.corba.se.spi.activation.Server;
 import com.sun.javafx.fxml.expression.BinaryExpression;
 
 import Sort.ListaEnlazada;
@@ -235,6 +236,8 @@ public class Servidor {
 					ServerFunctions.playsong(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("infoUsuario")) {
 					ServerFunctions.infoUsuario(clienteNuevo, doc);
+				} else if (nodo.getTextContent().equals("addFriend")){
+					ServerFunctions.addFriend(clienteNuevo, doc);
 				}
 
 				// TransformerFactory transformerFactory = TransformerFactory.newInstance();
