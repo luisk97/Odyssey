@@ -222,6 +222,11 @@ public class MensajeXml {
 				    usua.appendChild(nom);
 				    datos.appendChild(usua);
 		    }
+		    TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer t = tf.newTransformer();
+			StringWriter sw = new StringWriter();
+			t.transform(new DOMSource(doc2), new StreamResult(sw));
+			stringXml = sw.toString();
 		}
 		catch(Exception e) {
 			e.printStackTrace();

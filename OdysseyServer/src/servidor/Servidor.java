@@ -238,6 +238,10 @@ public class Servidor {
 					ServerFunctions.infoUsuario(clienteNuevo, doc);
 				} else if (nodo.getTextContent().equals("addFriend")){
 					ServerFunctions.addFriend(clienteNuevo, doc);
+				}else if (nodo.getTextContent().equals("editUsuario")) {
+					ServerFunctions.editUsuario(clienteNuevo, doc);
+				}else if(nodo.getTextContent().equals("Amigo")) {
+					ServerFunctions.
 				}
 
 				// TransformerFactory transformerFactory = TransformerFactory.newInstance();

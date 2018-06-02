@@ -397,29 +397,51 @@ public class ServerFunctions {
 		Node nodamigo = nodoamigo.item(0);
 		String usuario = nod.getTextContent();
 		String amigo = nodamigo.getTextContent();
-		
-		
-		
+
 		User user = BinarySearchTree.searchUser(usuario);
 		User friend = BinarySearchTree.searchUser(amigo);
-		if(friend!=null) {
+		if (friend != null) {
 			user.addAmigo(friend);
 			resp.println("AddUser");
 			File file = new File("Users.json");
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeValue(file, users);
 			clienteNuevo.close();
-		}
-		else {
+		} else {
 			resp.println("ErrorUsuario");
 			clienteNuevo.close();
 		}
-		
-		
-		
-		
-		
 
 	}
-
+	protected static void editUsuario(Socket clienteNuevo, Document doc) throws IOException {
+		System.out.println("Se esta editando un perfil");
+		PrintStream resp = new PrintStream(clienteNuevo.getOutputStream());
+		NodeList nodos = doc.getElementsByTagName("UsuarioAnt");
+		Node nod = nodos.item(0);
+		String usuarioAnt = nod.getTextContent();
+		System.out.println(usuarioAnt);
+		User user = BinarySearchTree.searchUser(usuarioAnt);
+		nodos = doc.getElementsByTagName("UsuarioNew");
+		nod = nodos.item(0);
+		user.setUsuario(nod.getTextContent());
+		nodos = doc.getElementsByTagName("Nombre");
+		nod = nodos.item(0);
+		user.setNombre(nod.getTextContent());
+		nodos = doc.getElementsByTagName("Edad");
+		nod = nodos.item(0);
+		user.setEdad(nod.getTextContent());
+		
+		ArrayList<User> users = Servidor.users;
+		
+		File file = new File("Users.json");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(file, users);
+		
+		MensajeXml msj = new MensajeXml();
+		String stringXml = msj.xmlInfoUser(user);
+		resp.println(stringXml);
+		System.out.println("Mensaje enviado");
+		clienteNuevo.close();
+}
+	protected retornar
 }
